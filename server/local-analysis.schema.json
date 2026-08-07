@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["faceShape", "undertone", "skinCondition", "direction", "confidence", "caveats", "colorProfile", "skinObservation", "styleMatches", "makeupPlan", "previewPrompt"],
+  "properties": {
+    "faceShape": { "type": "string" },
+    "undertone": { "type": "string" },
+    "skinCondition": { "type": "string" },
+    "direction": { "type": "string" },
+    "confidence": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "caveats": { "type": "array", "items": { "type": "string" } },
+    "colorProfile": {
+      "type": "object", "additionalProperties": false, "required": ["season", "palette", "bestColors", "avoidColors"],
+      "properties": { "season": { "type": "string" }, "palette": { "type": "array", "items": { "type": "string" } }, "bestColors": { "type": "array", "items": { "type": "string" } }, "avoidColors": { "type": "array", "items": { "type": "string" } } }
+    },
+    "skinObservation": {
+      "type": "object", "additionalProperties": false, "required": ["summary", "areas", "caveat"],
+      "properties": { "summary": { "type": "string" }, "areas": { "type": "array", "items": { "type": "string" } }, "caveat": { "type": "string" } }
+    },
+    "styleMatches": {
+      "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["id", "name", "score", "why", "colors"], "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "score": { "type": "integer", "minimum": 0, "maximum": 100 }, "why": { "type": "string" }, "colors": { "type": "array", "items": { "type": "string" } } } }
+    },
+    "makeupPlan": {
+      "type": "array", "minItems": 1, "maxItems": 8, "items": { "type": "object", "additionalProperties": false, "required": ["id", "order", "area", "title", "action", "amount", "texture", "avoid", "productCategoryIds", "tutorialIds"], "properties": { "id": { "type": "string" }, "order": { "type": "integer" }, "area": { "type": "string", "enum": ["base", "brow", "eye", "cheek", "lip"] }, "title": { "type": "string" }, "action": { "type": "string" }, "amount": { "type": "string" }, "texture": { "type": "string" }, "avoid": { "type": "string" }, "productCategoryIds": { "type": "array", "items": { "type": "string" } }, "tutorialIds": { "type": "array", "items": { "type": "string" } } } }
+    },
+    "previewPrompt": {
+      "type": "object", "additionalProperties": false, "required": ["prompt", "negativePrompt", "preserveIdentity", "disclosure"],
+      "properties": { "prompt": { "type": "string" }, "negativePrompt": { "type": "string" }, "preserveIdentity": { "type": "boolean" }, "disclosure": { "type": "string" } }
+    }
+  }
+}

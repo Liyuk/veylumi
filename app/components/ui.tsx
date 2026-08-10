@@ -1,5 +1,6 @@
 import { Button } from "@radix-ui/themes";
 import { ArrowRightIcon, ArrowTopRightIcon, CheckCircledIcon, HeartFilledIcon, HeartIcon } from "@radix-ui/react-icons";
+import { useI18n } from "../i18n";
 
 type ProductLikeButtonProps = {
   saved: boolean;
@@ -9,7 +10,8 @@ type ProductLikeButtonProps = {
 };
 
 export function ProductLikeButton({ saved, onToggle, label = "商品", className = "catalog-heart" }: ProductLikeButtonProps) {
-  return <Button variant="ghost" className={className} aria-label={saved ? `取消收藏${label}` : `收藏${label}`} onClick={onToggle}>{saved ? <HeartFilledIcon /> : <HeartIcon />}</Button>;
+  const { t } = useI18n();
+  return <Button variant="ghost" className={className} aria-label={saved ? `${t("common.removeSaved")}${label}` : `${t("common.save")}${label}`} onClick={onToggle}>{saved ? <HeartFilledIcon /> : <HeartIcon />}</Button>;
 }
 
 export function Metric({ label, value, score }: { label: string; value: string; score?: string }) {

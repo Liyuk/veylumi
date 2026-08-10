@@ -61,7 +61,7 @@ export type UserSettings = {
   displayName: string;
   email: string;
   region: "中国大陆" | "美国/海外";
-  language: "中文" | "English";
+  language: "zh-CN" | "en-US" | "中文" | "English";
   skinProfile: "未设置" | "干皮" | "油皮" | "混合皮" | "中性皮肤";
   undertone: "未设置" | "冷调" | "中性" | "暖调";
   savePhotosForThreeDays: boolean;
@@ -91,7 +91,7 @@ export const defaultSettings: UserSettings = {
   displayName: demoUser.displayName,
   email: demoUser.email,
   region: "中国大陆",
-  language: "中文",
+  language: "zh-CN",
   skinProfile: "未设置",
   undertone: "未设置",
   savePhotosForThreeDays: false,

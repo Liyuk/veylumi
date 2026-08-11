@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { Badge, Button, Card, Dialog, DropdownMenu, Select, Theme } from "@radix-ui/themes";
 import { ArrowRightIcon, ArrowTopRightIcon, CaretDownIcon, CheckCircledIcon, ClockIcon, Cross1Icon, CrossCircledIcon, DashboardIcon, DotsHorizontalIcon, ExitIcon, GearIcon, HeartIcon, LockClosedIcon, MagicWandIcon, MagnifyingGlassIcon, QuestionMarkCircledIcon, ReloadIcon, UploadIcon } from "@radix-ui/react-icons";
@@ -34,10 +34,11 @@ export default function Home() {
   const [toast, setToast] = useState<{ message: string; kind: "success" | "error" } | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const copy = useCallback((key: string) => translate(localeFromLanguage(db.settings.language), key), [db.settings.language]);
 
-  useEffect(() => { fetchDb().then((remoteDb) => { const next = purgeExpiredPhotos(remoteDb); setDb(next); setHydrated(true); if (JSON.stringify(next) !== JSON.stringify(remoteDb)) void saveDb(next).catch(() => undefined); }).catch(() => { setApiError("无法连接 Veylumi Server API，请先运行 npm run api:local"); setHydrated(true); }); }, []);
+  useEffect(() => { fetchDb().then((remoteDb) => { const next = purgeExpiredPhotos(remoteDb); setDb(next); setHydrated(true); if (JSON.stringify(next) !== JSON.stringify(remoteDb)) void saveDb(next).catch(() => undefined); }).catch(() => { setApiError(copy("toast.apiUnavailable")); setHydrated(true); }); }, [copy]);
 
-  useEffect(() => { if (hydrated && !apiError) { const timer = window.setTimeout(() => void saveDb(db).catch(() => setApiError("数据保存失败，请检查本地 API 服务")), 500); return () => window.clearTimeout(timer); } }, [db, hydrated, apiError]);
+  useEffect(() => { if (hydrated && !apiError) { const timer = window.setTimeout(() => void saveDb(db).catch(() => setApiError(copy("toast.saveFailed"))), 500); return () => window.clearTimeout(timer); } }, [db, hydrated, apiError, copy]);
 
   function notify(message: string, kind: "success" | "error" = "success") {
     setToast({ message, kind });
@@ -48,8 +49,8 @@ export default function Home() {
     const file = event.target.files?.[0];
     if (event.target) event.target.value = "";
     if (!file) return;
-    if (!file.type.startsWith("image/")) return notify("请上传 JPG、PNG 或 WEBP 图片", "error");
-    if (file.size > 10 * 1024 * 1024) return notify("图片不能超过 10MB", "error");
+    if (!file.type.startsWith("image/")) return notify(copy("toast.invalidImage"), "error");
+    if (file.size > 10 * 1024 * 1024) return notify(copy("toast.imageTooLarge"), "error");
     const inspection = await inspectPhoto(file);
     if (!inspection.ok) return notify(inspection.message, "error");
     const createdAt = new Date().toISOString();
@@ -62,13 +63,13 @@ export default function Home() {
     setShowUpload(false); setView("analyze"); setProcessing(true);
     try {
       submitted = await startPhotoAnalysis(file);
-      notify("照片已接收，本地 Codex 正在分析…");
+      notify(copy("toast.photoReceived"));
       const job = await waitForPhotoAnalysis(submitted.jobId);
-      if (job.status === "failed" || !job.result) throw new Error(job.error ?? "分析任务失败");
+      if (job.status === "failed" || !job.result) throw new Error(job.error ?? copy("toast.analysisFailed"));
       localAnalysis = job.result;
     } catch (error) {
       setProcessing(false);
-      return notify(error instanceof Error ? error.message.slice(0, 180) : "本地分析服务暂时不可用，请确认 Server API 正在运行", "error");
+      return notify(error instanceof Error ? error.message.slice(0, 180) : copy("toast.analysisUnavailable"), "error");
     }
     const result = localAnalysis.analysis;
     const record: AnalysisRecord = { id: analysisId, userId: db.user.id, title: result.direction, detail: `${result.undertone} · 单人正脸`, createdAt, photoAssetId: photoId, analysisJobId: submitted.jobId, provider: localAnalysis.provider ?? null, previewImageUrl: localAnalysis.previewImageUrl ?? null, imageProvider: localAnalysis.imageProvider ?? null, imageModel: localAnalysis.imageModel ?? null, previewDisclosure: localAnalysis.previewDisclosure, context: { skinProfile: db.settings.skinProfile, region: db.settings.region, occasion: "日常妆" }, status: "complete", result };
@@ -80,31 +81,31 @@ export default function Home() {
     setPreview(null);
     if (submitted.jobId) void fetchPreviewImage(submitted.jobId).then((next) => { if (next) { setPreview((prev) => { if (prev) prev.revoke(); return next; }); } });
     setProcessing(false); setUploaded(true); setShowUpload(false); setView("analyze");
-    notify(inspection.warning ?? "照片已接收，本地分析已完成");
+    notify(inspection.warning ?? copy("toast.analysisComplete"));
   }
 
   function toggleSaved(id: number) {
     const wasSaved = db.savedProductIds.includes(id);
     setDb((current) => ({ ...current, savedProductIds: wasSaved ? current.savedProductIds.filter((item) => item !== id) : [...current.savedProductIds, id] }));
-    notify(wasSaved ? "已取消收藏" : "已加入收藏");
+    notify(wasSaved ? copy("toast.removedSaved") : copy("toast.addedSaved"));
   }
 
   function updateRetention(value: boolean) {
     const now = new Date();
     setDb((current) => ({ ...current, photos: current.photos.map((photo) => photo.id !== activeAnalysis?.photoAssetId ? photo : { ...photo, retention: value ? "3d" : "immediate", expiresAt: value ? new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString() : now.toISOString(), deletedAt: value ? null : now.toISOString() }) }));
     if (!value && activeAnalysis?.analysisJobId) { void deletePhotoPreview(activeAnalysis.analysisJobId).catch(() => undefined); setActiveAnalysis((current) => current ? { ...current, previewImageUrl: null, imageProvider: null, imageModel: null, previewDisclosure: null } : current); setPreview((prev) => { if (prev) prev.revoke(); return null; }); }
-    notify(value ? "照片已保存 3 天，到期后自动删除" : "本次生成完成后已标记为删除");
+    notify(value ? copy("toast.photoRetention") : copy("toast.photoDeleted"));
   }
 
   function submitFeedback(kind: FeedbackKind, productId: number | null = null) {
-    if (!activeAnalysis) return notify("请先完成一次分析", "error");
+    if (!activeAnalysis) return notify(copy("toast.completeAnalysisFirst"), "error");
     setDb((current) => ({ ...current, feedback: [...current.feedback, { id: makeId("feedback"), userId: current.user.id, analysisId: activeAnalysis.id, productId, kind, note: "用户对本次推荐的快速反馈", createdAt: new Date().toISOString() }] }));
-    notify("已记录反馈，下次推荐会参考你的偏好");
+    notify(copy("toast.feedbackSaved"));
   }
 
-  function signOut() { setDb((current) => ({ ...current, authenticated: false })); setView("overview"); notify("已退出本地 Demo 账号"); }
-  function signIn() { setDb((current) => ({ ...current, authenticated: true })); notify("已登录本地 Demo 账号"); }
-  function saveSettings(settings: UserSettings) { const normalizedSettings = { ...settings, language: settings.language === "English" ? "en-US" as const : settings.language === "中文" ? "zh-CN" as const : settings.language }; setDb((current) => ({ ...current, settings: normalizedSettings, user: { ...current.user, displayName: normalizedSettings.displayName, email: normalizedSettings.email } })); setSettingsOpen(false); notify("用户设置已保存"); }
+  function signOut() { setDb((current) => ({ ...current, authenticated: false })); setView("overview"); notify(copy("toast.signedOut")); }
+  function signIn() { setDb((current) => ({ ...current, authenticated: true })); notify(copy("toast.signedIn")); }
+  function saveSettings(settings: UserSettings) { const normalizedSettings = { ...settings, language: settings.language === "English" ? "en-US" as const : settings.language === "中文" ? "zh-CN" as const : settings.language }; setDb((current) => ({ ...current, settings: normalizedSettings, user: { ...current.user, displayName: normalizedSettings.displayName, email: normalizedSettings.email } })); setSettingsOpen(false); notify(copy("toast.settingsSaved")); }
 
   const savedProducts = useMemo(() => products.filter((product) => db.savedProductIds.includes(product.id)), [db.savedProductIds]);
   const analyses = db.analyses;

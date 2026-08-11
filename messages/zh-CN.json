@@ -151,4 +151,13 @@
   "toast.help": "Veylumi 会在分析前检查照片质量与人脸数量",
   "toast.apiUnavailable": "无法连接 Veylumi Server API，请先运行 npm run api:local",
   "toast.saveFailed": "数据保存失败，请检查本地 API 服务"
+  ,"system.apiUnavailableTitle": "连接不到数据服务。",
+  "system.reconnect": "重新连接",
+  "system.noLocalStorageFallback": "Veylumi 不会使用浏览器 localStorage 作为回退数据源。",
+  "system.connecting": "正在连接 Veylumi Server API…",
+  "auth.welcome": "欢迎回来。",
+  "auth.localDemoDescription": "这是本地模拟登录，不会连接真实账号或发送任何数据。",
+  "auth.signInDemo": "以 Demo 账号登录",
+  "auth.demoAccount": "账号：Yuki · yuki@local.veylumi",
+  "common.help": "查看帮助"
 }

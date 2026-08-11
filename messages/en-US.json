@@ -151,4 +151,13 @@
   "toast.help": "Veylumi checks photo quality and face count before analysis",
   "toast.apiUnavailable": "Unable to connect to the Veylumi Server API. Run npm run api:local first.",
   "toast.saveFailed": "Data could not be saved; check the local API service"
+  ,"system.apiUnavailableTitle": "Unable to connect to the data service.",
+  "system.reconnect": "Reconnect",
+  "system.noLocalStorageFallback": "Veylumi does not use browser localStorage as a fallback data source.",
+  "system.connecting": "Connecting to the Veylumi Server API…",
+  "auth.welcome": "Welcome back.",
+  "auth.localDemoDescription": "This local demo does not connect to real accounts or send data.",
+  "auth.signInDemo": "Sign in with demo account",
+  "auth.demoAccount": "Account: Yuki · yuki@local.veylumi",
+  "common.help": "View help"
 }

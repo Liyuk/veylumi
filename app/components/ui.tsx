@@ -9,9 +9,10 @@ type ProductLikeButtonProps = {
   className?: string;
 };
 
-export function ProductLikeButton({ saved, onToggle, label = "商品", className = "catalog-heart" }: ProductLikeButtonProps) {
+export function ProductLikeButton({ saved, onToggle, label, className = "catalog-heart" }: ProductLikeButtonProps) {
   const { t } = useI18n();
-  return <Button variant="ghost" className={className} aria-label={saved ? `${t("common.removeSaved")}${label}` : `${t("common.save")}${label}`} onClick={onToggle}>{saved ? <HeartFilledIcon /> : <HeartIcon />}</Button>;
+  const accessibleLabel = label ?? t("catalog.product");
+  return <Button variant="ghost" className={className} aria-label={saved ? `${t("common.removeSaved")}${accessibleLabel}` : `${t("common.save")}${accessibleLabel}`} onClick={onToggle}>{saved ? <HeartFilledIcon /> : <HeartIcon />}</Button>;
 }
 
 export function Metric({ label, value, score }: { label: string; value: string; score?: string }) {
@@ -27,5 +28,6 @@ export function CheckItem({ title, text }: { title: string; text: string }) {
 }
 
 export function TutorialCard({ platform, title, creator, tags, url }: { platform: string; title: string; creator: string; tags: string; url: string }) {
-  return <a className="tutorial-card" href={url} target="_blank" rel="noreferrer"><span>{platform}</span><h3>{title}</h3><p>{creator} · {tags}</p><b>打开教程 <ArrowTopRightIcon /></b></a>;
+  const { t } = useI18n();
+  return <a className="tutorial-card" href={url} target="_blank" rel="noreferrer"><span>{platform}</span><h3>{title}</h3><p>{creator} · {tags}</p><b>{t("catalog.openTutorial")} <ArrowTopRightIcon /></b></a>;
 }

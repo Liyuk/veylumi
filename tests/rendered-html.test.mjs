@@ -45,6 +45,6 @@ test("keeps the V1 component boundaries explicit", async () => {
 test("starts a fresh analysis from the history page", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   assert.match(page, /function HistoryPage\(\{ records, feedback, onOpen, onNewAnalysis \}/);
-  assert.match(page, /<Button className="primary-button" onClick=\{onNewAnalysis\}>新建分析/);
+  assert.match(page, /<Button className="primary-button" onClick=\{onNewAnalysis\}>\{t\("history.new"\)\}/);
   assert.match(page, /<HistoryPage records=\{analyses\} feedback=\{feedback\} onOpen=\{onOpenAnalysis\} onNewAnalysis=\{onStart\}/);
 });

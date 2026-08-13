@@ -2,5 +2,5 @@
   "name": "@veylumi/api",
   "private": true,
   "type": "module",
-  "scripts": { "local": "node server/local-api.mjs" }
+  "scripts": { "local": "node server/local-api.mjs", "recommendation": "npm --prefix ../recommendation run start" }
 }

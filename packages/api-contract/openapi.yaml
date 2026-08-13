@@ -59,6 +59,22 @@ paths:
         '200':
           description: Tutorial catalog envelope
           content: { application/json: { schema: { $ref: '#/components/schemas/TutorialListEnvelope' } } }
+  /api/recommendations:
+    get:
+      summary: Return server-owned product recommendations for the authenticated user
+      parameters:
+        - name: categoryId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 12 }
+      responses:
+        '200':
+          description: Recommendation envelope; fallback is true if compute is unavailable
+          content: { application/json: { schema: { $ref: '#/components/schemas/RecommendationEnvelope' } } }
   /api/analyze:
     post:
       parameters:
@@ -195,6 +211,31 @@ components:
       properties:
         ok: { const: true }
         data: { $ref: '#/components/schemas/StateSnapshot' }
+        meta: { type: object, required: [requestId], properties: { requestId: { type: string } } }
+    RecommendationItem:
+      type: object
+      required: [productId, score, reason, caveat]
+      properties:
+        productId: { type: integer }
+        score: { type: integer, minimum: 0, maximum: 100 }
+        reason: { type: string }
+        caveat: { type: string }
+    RecommendationResponse:
+      type: object
+      required: [items, ruleVersion, modelVersion, fallback, cached]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/RecommendationItem' } }
+        ruleVersion: { type: integer }
+        modelVersion: { type: string }
+        fallback: { type: boolean }
+        cached: { type: boolean }
+        degraded: { type: string }
+    RecommendationEnvelope:
+      type: object
+      required: [ok, data, meta]
+      properties:
+        ok: { const: true }
+        data: { $ref: '#/components/schemas/RecommendationResponse' }
         meta: { type: object, required: [requestId], properties: { requestId: { type: string } } }
     ErrorEnvelope:
       type: object

@@ -177,7 +177,7 @@ export async function waitForPhotoAnalysis(jobId: string): Promise<AnalysisJob<L
       return {
         close: () => { closed = true; controller?.abort(); },
         addEventListener: (type, cb) => { listeners.set(type, cb); },
-        onError: (handler: () => void) => { /* fetch 失败时由轮询兜底，不额外触发 */ },
+        onError: () => { /* fetch 失败时由轮询兜底，不额外触发 */ },
       };
     },
   });

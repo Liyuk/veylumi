@@ -10,6 +10,7 @@ import { createAnalysisQueue } from "./analysis-jobs.mjs";
 import { createPreviewStore } from "./preview-store.mjs";
 import { MAX_REQUEST_BYTES, validateImageInput } from "./input-validation.mjs";
 import { products, tutorials } from "./catalog.mjs";
+import { createRecommendationGateway } from "./recommendation-gateway.mjs";
 
 // 可注入的 app 工厂：把配置、repository、队列、预览存储全部参数化，
 // 便于测试用临时路径/内存依赖构造并直接驱动 handler。
@@ -23,6 +24,7 @@ export function createApp({
   queue = null,
   aiProvider = process.env.VEYLUMI_AI_PROVIDER ?? "codex",
   imageProvider = process.env.VEYLUMI_IMAGE_PROVIDER ?? null,
+  recommendationGateway = createRecommendationGateway(),
 } = {}) {
   const analysisQueue = queue ?? createAnalysisQueue({
     filePath: process.env.VEYLUMI_ANALYSIS_QUEUE_FILE,
@@ -116,6 +118,13 @@ export function createApp({
     }
     if (url.pathname === "/api/catalog/products" && req.method === "GET") { requireApiAccess(req); return { status: 200, data: products }; }
     if (url.pathname === "/api/catalog/tutorials" && req.method === "GET") { requireApiAccess(req); return { status: 200, data: tutorials }; }
+    if (url.pathname === "/api/recommendations" && req.method === "GET") {
+      requireApiAccess(req);
+      const limit = Number(url.searchParams.get("limit") ?? 12);
+      if (!Number.isInteger(limit) || limit < 1 || limit > 50) throw new ApiError(400, ERROR_CODES.INVALID_STATE, "limit must be an integer between 1 and 50");
+      const categoryId = url.searchParams.get("categoryId");
+      return { status: 200, data: await recommendationGateway.rank({ state: await repository.snapshot(), products, categoryId, limit }) };
+    }
     if (url.pathname === "/api/analyze" && req.method === "POST") {
       requireApiAccess(req);
       let input;

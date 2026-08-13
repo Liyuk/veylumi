@@ -1,0 +1,44 @@
+openapi: 3.1.0
+info:
+  title: Veylumi Recommendation Internal API
+  version: 1.0.0
+  description: Private compute-service interface. It must never be called by Web, Android, or iOS directly.
+paths:
+  /health:
+    get:
+      responses:
+        '200': { description: Compute service health and model version }
+  /v1/rank:
+    post:
+      security: [{ InternalBearer: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RankRequest' }
+      responses:
+        '200': { description: Versioned ranking envelope }
+        '400': { description: Invalid request }
+        '401': { description: Invalid internal credential }
+components:
+  securitySchemes:
+    InternalBearer: { type: http, scheme: bearer }
+  schemas:
+    RankRequest:
+      type: object
+      required: [context, products]
+      properties:
+        context:
+          type: object
+          description: Anonymous cosmetic preferences only; no email, user ID, image, or raw feedback text.
+          properties:
+            undertone: { type: string, enum: [cool, neutral, warm, unknown] }
+            skin: { type: string, enum: [dry, oily, combination, normal, unknown] }
+            region: { type: string }
+            categoryId: { type: [string, 'null'] }
+        products: { type: array, maxItems: 500, items: { type: object, additionalProperties: true } }
+        limit: { type: integer, minimum: 1, maximum: 50 }
+        signals:
+          type: object
+          description: Aggregated, non-identifying interaction signals.
+          additionalProperties: true

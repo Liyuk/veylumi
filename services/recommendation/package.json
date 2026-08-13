@@ -1,0 +1,6 @@
+{
+  "name": "@veylumi/recommendation-service",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "node server/recommendation-server.mjs" }
+}

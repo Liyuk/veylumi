@@ -70,6 +70,18 @@ test("catalog endpoints return authenticated shared product and tutorial data", 
   }
 });
 
+test("recommendations are served through the API gateway and fall back safely", async () => {
+  const { app, base, token, dir } = await setup();
+  try {
+    const response = await fetch(`${base}/api/recommendations?categoryId=blush`, { headers: { authorization: `Bearer ${token}` } });
+    const body = await response.json();
+    assert.equal(response.status, 200);
+    assert.ok(body.data.items.length > 0);
+    assert.equal(body.data.fallback, true);
+    assert.equal(body.data.items[0].productId, 1);
+  } finally { app.server.close(); await rm(dir, { recursive: true, force: true }); }
+});
+
 test("state POST with If-Match conflict is rejected", async () => {
   const dir = await mkdtemp(path.join(os.tmpdir(), "veylumi-repo-conflict-"));
   try {

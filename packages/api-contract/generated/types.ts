@@ -35,3 +35,5 @@ export type StateSnapshot = {
   feedback: Record<string, unknown>[];
   settings: StateSettings;
 };
+export type RecommendationItem = { productId: number; score: number; reason: string; caveat: string };
+export type RecommendationResponse = { items: RecommendationItem[]; ruleVersion: number; modelVersion: string; fallback: boolean; cached: boolean; degraded?: string };

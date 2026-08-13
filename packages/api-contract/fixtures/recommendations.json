@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "data": {
+    "items": [{ "productId": 1, "score": 99, "reason": "undertone match · skin match · region available · category match", "caveat": "Shade and finish should be verified before purchase." }],
+    "ruleVersion": 1,
+    "modelVersion": "rules-v1",
+    "fallback": false,
+    "cached": false
+  },
+  "meta": { "requestId": "fixture-recommendations" }
+}

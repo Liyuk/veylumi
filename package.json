@@ -10,6 +10,7 @@
     "build": "npm --prefix apps/web run build",
     "start": "npm --prefix apps/web run start",
     "api:local": "npm --prefix services/api run local",
+    "recommendation:local": "npm --prefix services/recommendation run start",
     "tokens:generate": "npm --prefix packages/design-tokens run generate",
     "client-contract:generate": "npm --prefix packages/client-contract run generate",
     "recommendation-contract:generate": "npm --prefix packages/recommendation-contract run generate",

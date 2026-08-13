@@ -1,18 +1,19 @@
 {
-  "name": "site-creator-vinext-starter",
+  "name": "veylumi",
   "version": "0.1.0",
   "private": true,
   "engines": {
     "node": ">=22.13.0"
   },
   "scripts": {
-    "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext dev",
-    "build": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext build",
-    "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
-    "api:local": "node server/local-api.mjs",
-    "test": "npm run build && node --test tests/*.test.mjs",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .local --ignore-pattern .wrangler --ignore-pattern .data --ignore-pattern .playwright-cli --ignore-pattern storage",
+    "dev": "npm --prefix apps/web run dev",
+    "build": "npm --prefix apps/web run build",
+    "start": "npm --prefix apps/web run start",
+    "api:local": "npm --prefix services/api run local",
+    "i18n:generate": "npm --prefix packages/i18n run generate",
+    "test": "npm run i18n:generate && npm run build && node --test tests/*.test.mjs",
+    "typecheck": "npm --prefix apps/web run typecheck",
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern apps/web/dist --ignore-pattern .next --ignore-pattern .local --ignore-pattern .wrangler --ignore-pattern .data --ignore-pattern .playwright-cli --ignore-pattern storage",
     "db:generate": "drizzle-kit generate",
     "e2e": "playwright test",
     "e2e:install": "playwright install chromium"

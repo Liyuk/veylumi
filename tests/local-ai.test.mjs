@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { analyzeLocalPhoto } from "../server/local-ai.mjs";
+import { analyzeLocalPhoto } from "../services/api/server/local-ai.mjs";
 
 test("local AI analyzes the demo face photo through the provider contract", async () => {
   const result = await analyzeLocalPhoto({ filename: "face.jpeg", mimeType: "image/jpeg", size: 12345 });

@@ -9,6 +9,7 @@ import { deleteGeneratedPreview, generatePhotorealisticPreview } from "./image-e
 import { createAnalysisQueue } from "./analysis-jobs.mjs";
 import { createPreviewStore } from "./preview-store.mjs";
 import { MAX_REQUEST_BYTES, validateImageInput } from "./input-validation.mjs";
+import { products, tutorials } from "./catalog.mjs";
 
 // 可注入的 app 工厂：把配置、repository、队列、预览存储全部参数化，
 // 便于测试用临时路径/内存依赖构造并直接驱动 handler。
@@ -100,6 +101,8 @@ export function createApp({
       const expectedRevision = typeof req.headers["if-match"] === "string" ? Number(req.headers["if-match"]) : undefined;
       return { status: 200, data: await repository.replace(await readJson(req), { expectedRevision }) };
     }
+    if (url.pathname === "/api/catalog/products" && req.method === "GET") { requireApiAccess(req); return { status: 200, data: products }; }
+    if (url.pathname === "/api/catalog/tutorials" && req.method === "GET") { requireApiAccess(req); return { status: 200, data: tutorials }; }
     if (url.pathname === "/api/analyze" && req.method === "POST") {
       requireApiAccess(req);
       let input;

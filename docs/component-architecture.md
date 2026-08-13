@@ -4,7 +4,7 @@
 
 ## 基础组件
 
-`app/components/ui.tsx` 负责跨页面复用的展示与交互组件：
+`apps/web/app/components/ui.tsx` 负责跨页面复用的展示与交互组件：
 
 - `ProductLikeButton`：商品收藏状态、标签和统一点击区域。
 - `Metric`：面部分析指标。
@@ -12,18 +12,18 @@
 - `CheckItem`：上传前检查项。
 - `TutorialCard`：教程入口卡片。
 
-`app/components/beauty.tsx` 负责美妆领域展示组件：
+`apps/web/app/components/beauty.tsx` 负责美妆领域展示组件：
 
 - `MatchedProductRow`：分析报告中的推荐商品行。
 - `CatalogCard`：商品发现页卡片。
 - `CatalogFilters`：参考色号、肤质和市场筛选。
 - `TutorialGrid`、`CatalogNotice`：教程入口与商品数据说明。
 
-`app/catalog-data.ts` 只存放本地商品、教程和示例历史数据，不包含 JSX 或页面状态。
+`apps/web/app/catalog-data.ts` 只存放本地商品、教程和示例历史数据，不包含 JSX 或页面状态。
 
 ## 页面层
 
-`app/page.tsx` 只保留：
+`apps/web/app/page.tsx` 只保留：
 
 - 页面路由状态和本地数据库状态；
 - 上传、人脸检查、保留周期、反馈等用例；
@@ -31,7 +31,7 @@
 
 ## 领域层
 
-`app/v1-domain.ts` 负责商品匹配、妆容步骤和教程关联，不依赖 React 或 CSS。
+`packages/domain/analysis.ts` 负责商品匹配、妆容步骤和教程关联，不依赖 React 或 CSS。
 
 ## 约束
 

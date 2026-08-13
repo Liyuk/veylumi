@@ -37,7 +37,7 @@ Repository interfaces
 ## 3. 当前本地实现
 
 - React client + Vinext。
-- `app/server-api.ts` 是页面唯一的数据访问入口，所有状态通过 Server API 读写。
+- `apps/web/app/server-api.ts` 是页面唯一的数据访问入口，所有状态通过 Server API 读写。
 - 本地开发 API 使用 `.data/veylumi.json`；未来可替换 SQLite/D1/Postgres repository。
 - 当前原图不写入数据库；仅当前会话使用预览 Data URL，数据库存照片元数据。
 - 启动时执行过期照片清理。

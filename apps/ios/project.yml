@@ -1,0 +1,20 @@
+name: Veylumi
+options:
+  bundleIdPrefix: com.veylumi
+targets:
+  Veylumi:
+    type: application
+    platform: iOS
+    deploymentTarget: '17.0'
+    sources: [Veylumi]
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.veylumi.app
+      GENERATE_INFOPLIST_FILE: YES
+      INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking: YES
+  VeylumiTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [VeylumiTests]
+    dependencies: [{ target: Veylumi }]
+    settings:
+      GENERATE_INFOPLIST_FILE: YES

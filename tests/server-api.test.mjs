@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createAnalysisWaiter } from "../server/wait-analysis.mjs";
+import { createAnalysisWaiter } from "../services/api/server/wait-analysis.mjs";
 
 test("waiter resolves on terminal event from SSE", async () => {
   let listener;
@@ -54,4 +54,3 @@ test("waiter polls through intermediate states to completion", async () => {
   const job = await waiter.wait("job_1");
   assert.equal(job.status, "completed");
 });
-

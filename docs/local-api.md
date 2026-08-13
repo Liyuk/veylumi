@@ -42,7 +42,7 @@ npm run api:local
 
 建议客户端为每次用户提交生成唯一 `Idempotency-Key` 请求头。重复提交同一 key 会返回已有任务，不会重复启动 Codex。任务状态、结果和重试次数保存于 `VEYLUMI_ANALYSIS_QUEUE_FILE` 指定的 JSON 文件，默认是 `.data/analysis-jobs.json`；本地服务重启会恢复 `queued/running` 任务。任务完成或失败后，队列文件只保留文件名、MIME 和大小等输入摘要，不继续保留图片 Data URL。
 
-`server/local-repository.mjs` 是存储边界。页面通过 `app/server-api.ts` 读取和写入 Server API；API 不可用时页面会显示连接错误，不回退到浏览器存储。以后替换 SQLite、Postgres 或 Cloudflare D1 时，只需替换 Repository 实现。
+`services/api/server/local-repository.mjs` 是存储边界。页面通过 `apps/web/app/server-api.ts` 读取和写入 Server API；API 不可用时页面会显示连接错误，不回退到浏览器存储。以后替换 SQLite、Postgres 或 Cloudflare D1 时，只需替换 Repository 实现。
 
 照片二进制不应写入这个 JSON 数据库；生产实现需要对象存储、到期任务和不可恢复删除，数据库只保存 asset metadata、retention 和 expiresAt。
 

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 test("upload enters processing state before the asynchronous analysis request", () => {
-  const source = fs.readFileSync("app/page.tsx", "utf8");
+  const source = fs.readFileSync("apps/web/app/page.tsx", "utf8");
   const uploadStart = source.indexOf("async function handleUpload");
   const requestStart = source.indexOf("startPhotoAnalysis(file)", uploadStart);
   const loadingState = source.indexOf("setProcessing(true)", uploadStart);

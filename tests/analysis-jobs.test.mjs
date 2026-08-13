@@ -3,7 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { createAnalysisQueue } from "../server/analysis-jobs.mjs";
+import { createAnalysisQueue } from "../services/api/server/analysis-jobs.mjs";
 
 test("analysis jobs are persisted, idempotent, retried, and non-blocking", async () => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "veylumi-jobs-test-"));

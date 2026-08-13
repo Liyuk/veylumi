@@ -11,7 +11,7 @@ These rules apply to all future Veylumi UI work.
 
 ## Brand layer
 
-- Brand tokens live in `app/brand.css`.
+- Brand tokens live in `apps/web/app/brand.css`.
 - Product UI consumes `--veylumi-*` tokens instead of hard-coded colors, radii, shadows, or spacing.
 - Keep the 8px spacing scale: 4, 8, 12, 16, 24, 32, 48, 64.
 - Keep the radius scale: 8, 12, 20, and pill only for tags/statuses.

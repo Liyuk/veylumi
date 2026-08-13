@@ -1,0 +1,6 @@
+{
+  "name": "@veylumi/api",
+  "private": true,
+  "type": "module",
+  "scripts": { "local": "node server/local-api.mjs" }
+}

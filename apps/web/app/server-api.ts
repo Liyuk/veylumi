@@ -1,5 +1,6 @@
 import { LocalDb } from "./local-db";
-import { createAnalysisWaiter } from "../server/wait-analysis.mjs";
+import { createAnalysisWaiter } from "../../../services/api/server/wait-analysis.mjs";
+import type { AnalysisJob as ContractAnalysisJob, ApiFailure as ContractApiFailure, ApiMeta as ContractApiMeta, ApiSuccess as ContractApiSuccess } from "../../../packages/api-contract/generated/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_VEYLUMI_API_URL ?? "http://127.0.0.1:8787";
 let apiToken: string | null = null;
@@ -17,10 +18,10 @@ export type LocalAnalysisPayload = {
   imageModel?: string;
   previewDisclosure?: string;
 };
-export type AnalysisJob<T = LocalAnalysisPayload> = { jobId: string; status: "queued" | "running" | "completed" | "failed"; createdAt?: string; startedAt?: string; completedAt?: string; result: T | null; error: string | null };
-export type ApiMeta = { requestId: string };
-export type ApiSuccess<T> = { ok: true; data: T; meta: ApiMeta };
-export type ApiFailure = { ok: false; error: { code: string; message: string; details?: unknown }; meta: ApiMeta };
+export type AnalysisJob<T = LocalAnalysisPayload> = ContractAnalysisJob<T>;
+export type ApiMeta = ContractApiMeta;
+export type ApiSuccess<T> = ContractApiSuccess<T>;
+export type ApiFailure = ContractApiFailure;
 
 export class ServerApiError extends Error {
   readonly code: string;

@@ -16,7 +16,7 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { browserName: "chromium" } }],
   webServer: [
     {
-      command: "node server/local-api.mjs",
+      command: "node services/api/server/local-api.mjs",
       url: "http://127.0.0.1:8787/health",
       reuseExistingServer: true,
       timeout: 30_000,

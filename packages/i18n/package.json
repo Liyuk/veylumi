@@ -1,0 +1,6 @@
+{
+  "name": "@veylumi/i18n",
+  "private": true,
+  "type": "module",
+  "scripts": { "generate": "node generate-platform-resources.mjs" }
+}

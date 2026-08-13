@@ -1,0 +1,163 @@
+openapi: 3.1.0
+info:
+  title: Veylumi API
+  version: 1.0.0
+  description: Shared contract for Web, Android, and iOS clients.
+servers:
+  - url: http://127.0.0.1:8787
+paths:
+  /health:
+    get:
+      responses:
+        '200': { description: Service is healthy }
+  /api/bootstrap:
+    get:
+      responses:
+        '200': { $ref: '#/components/responses/BootstrapResponse' }
+  /api/state:
+    get:
+      responses:
+        '200': { $ref: '#/components/responses/StateResponse' }
+    post:
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '200': { $ref: '#/components/responses/StateResponse' }
+        '409': { $ref: '#/components/responses/ErrorResponse' }
+  /api/catalog/products:
+    get:
+      summary: Authenticated product catalog used by all clients
+      responses:
+        '200':
+          description: Product catalog envelope
+          content: { application/json: { schema: { $ref: '#/components/schemas/ProductListEnvelope' } } }
+  /api/catalog/tutorials:
+    get:
+      summary: Authenticated tutorial catalog used by all clients
+      responses:
+        '200':
+          description: Tutorial catalog envelope
+          content: { application/json: { schema: { $ref: '#/components/schemas/TutorialListEnvelope' } } }
+  /api/analyze:
+    post:
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AnalysisInput' }
+      responses:
+        '200': { $ref: '#/components/responses/AnalysisJobResponse' }
+  /api/analyze/{jobId}:
+    get:
+      parameters: [{ $ref: '#/components/parameters/JobId' }]
+      responses:
+        '200': { $ref: '#/components/responses/AnalysisJobResponse' }
+  /api/analyze/{jobId}/events:
+    get:
+      parameters: [{ $ref: '#/components/parameters/JobId' }]
+      responses:
+        '200': { description: Server-sent analysis events }
+  /api/analyze/{jobId}/preview:
+    get:
+      parameters: [{ $ref: '#/components/parameters/JobId' }]
+      responses:
+        '200': { description: Authenticated preview image }
+    post:
+      parameters: [{ $ref: '#/components/parameters/JobId' }]
+      responses:
+        '200': { description: Preview deletion result }
+components:
+  parameters:
+    JobId: { name: jobId, in: path, required: true, schema: { type: string } }
+    IfMatch: { name: If-Match, in: header, required: true, schema: { type: integer } }
+  schemas:
+    AnalysisInput:
+      type: object
+      required: [imageData, filename, mimeType, size]
+      properties:
+        imageData: { type: string }
+        filename: { type: string }
+        mimeType: { type: string }
+        size: { type: integer, maximum: 10485760 }
+    AnalysisJob:
+      type: object
+      required: [jobId, status, result, error]
+      properties:
+        jobId: { type: string }
+        status: { type: string, enum: [queued, running, completed, failed] }
+        result: {}
+        error: { type: [string, 'null'] }
+    Product:
+      type: object
+      required: [id, brand, name, type, price, tone, shade, region, color, url, categoryId, undertone, finish, skinTags]
+      properties:
+        id: { type: integer }
+        brand: { type: string }
+        name: { type: string }
+        type: { type: string }
+        price: { type: string }
+        tone: { type: string }
+        shade: { type: string }
+        region: { type: string }
+        color: { type: string }
+        url: { type: string, format: uri }
+        categoryId: { type: string }
+        undertone: { type: string }
+        finish: { type: string }
+        skinTags: { type: array, items: { type: string } }
+    Tutorial:
+      type: object
+      required: [platform, creator, title, tags, url, productIds]
+      properties:
+        platform: { type: string }
+        creator: { type: string }
+        title: { type: string }
+        tags: { type: string }
+        url: { type: string, format: uri }
+        productIds: { type: array, items: { type: integer } }
+    ProductListEnvelope:
+      type: object
+      required: [ok, data, meta]
+      properties:
+        ok: { const: true }
+        data: { type: array, items: { $ref: '#/components/schemas/Product' } }
+        meta: { type: object }
+    TutorialListEnvelope:
+      type: object
+      required: [ok, data, meta]
+      properties:
+        ok: { const: true }
+        data: { type: array, items: { $ref: '#/components/schemas/Tutorial' } }
+        meta: { type: object }
+    ErrorEnvelope:
+      type: object
+      required: [ok, error, meta]
+      properties:
+        ok: { const: false }
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            details: {}
+        meta: { type: object, required: [requestId], properties: { requestId: { type: string } } }
+  responses:
+    BootstrapResponse: { description: Bootstrap envelope }
+    StateResponse: { description: State envelope }
+    AnalysisJobResponse:
+      description: Analysis job envelope
+      content: { application/json: { schema: { $ref: '#/components/schemas/AnalysisJob' } } }
+    ErrorResponse:
+      description: Error envelope
+      content: { application/json: { schema: { $ref: '#/components/schemas/ErrorEnvelope' } } }

@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createApp } from "../server/local-api.mjs";
-import { createPreviewStore } from "../server/preview-store.mjs";
+import { createApp } from "../services/api/server/local-api.mjs";
+import { createPreviewStore } from "../services/api/server/preview-store.mjs";
 
 const JPEG = "data:image/jpeg;base64,/9j/4AAQSkZJRg==";
 
@@ -55,11 +55,26 @@ test("api access requires bearer token", async () => {
   }
 });
 
+test("catalog endpoints return authenticated shared product and tutorial data", async () => {
+  const { app, base, token, dir } = await setup();
+  try {
+    const headers = { authorization: `Bearer ${token}` };
+    const products = await fetch(`${base}/api/catalog/products`, { headers });
+    const tutorials = await fetch(`${base}/api/catalog/tutorials`, { headers });
+    assert.equal(products.status, 200);
+    assert.equal(tutorials.status, 200);
+    assert.ok((await products.json()).data.length > 0);
+    assert.ok((await tutorials.json()).data.length > 0);
+  } finally {
+    app.server.close(); await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("state POST with If-Match conflict is rejected", async () => {
   const dir = await mkdtemp(path.join(os.tmpdir(), "veylumi-repo-conflict-"));
   try {
     const repoFile = path.join(dir, "state.json");
-    const { createJsonRepository } = await import("../server/local-repository.mjs");
+    const { createJsonRepository } = await import("../services/api/server/local-repository.mjs");
     const repository = createJsonRepository(repoFile);
     await repository.replace({ version: 1, revision: 0, analyses: [] });
     const app = createApp({ repository, previewStore: createPreviewStore({ dir: path.join(dir, "p") }), queueOptions: { runner: async () => ({}) } });

@@ -2,8 +2,8 @@
 
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 import type { UserSettings } from "./local-db";
-import zhCN from "../messages/zh-CN.json";
-import enUS from "../messages/en-US.json";
+import zhCN from "../../../packages/i18n/locales/zh-CN.json";
+import enUS from "../../../packages/i18n/locales/en-US.json";
 
 export const supportedLocales = ["zh-CN", "en-US"] as const;
 export type Locale = (typeof supportedLocales)[number];

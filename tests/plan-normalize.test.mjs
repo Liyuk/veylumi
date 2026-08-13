@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { normalizeArea, normalizeMakeupPlan } from "../server/plan-normalize.mjs";
+import { normalizeArea, normalizeMakeupPlan } from "../services/api/server/plan-normalize.mjs";
 
 test("normalizeArea maps free English labels to the canonical union", () => {
   assert.equal(normalizeArea("Complexion"), "base");

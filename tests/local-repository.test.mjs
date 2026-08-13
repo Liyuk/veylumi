@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createJsonRepository } from "../server/local-repository.mjs";
+import { createJsonRepository } from "../services/api/server/local-repository.mjs";
 
 test("json repository appends and reloads state through its storage boundary", async () => {
   const dir = await mkdtemp(path.join(os.tmpdir(), "veylumi-repo-"));

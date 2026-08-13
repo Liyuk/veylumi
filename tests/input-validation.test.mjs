@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { MAX_REQUEST_BYTES, validateImageInput } from "../server/input-validation.mjs";
+import { MAX_REQUEST_BYTES, validateImageInput } from "../services/api/server/input-validation.mjs";
 
 const jpeg = "data:image/jpeg;base64,/9j/4AAQSkZJRg==";
 

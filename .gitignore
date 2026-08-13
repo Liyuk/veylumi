@@ -44,6 +44,20 @@ next-env.d.ts
 /.local/
 /storage/
 /public/generated/
+/apps/web/dist/
+/apps/web/.vinext/
+/apps/web/.wrangler/
+/apps/web/tsconfig.tsbuildinfo
+/apps/web/public/generated/
+
+# native build products and machine-local SDK/Xcode state
+/apps/android/.gradle/
+/apps/android/build/
+/apps/android/app/build/
+/apps/android/local.properties
+/apps/ios/Veylumi.xcodeproj/xcuserdata/
+/apps/ios/Veylumi.xcodeproj/project.xcworkspace/xcuserdata/
+/services/api/.data/
 
 # playwright
 /playwright-report/

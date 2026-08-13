@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
-import { renderPreviewSvg } from "../server/preview-svg.mjs";
+import { renderPreviewSvg } from "../services/api/server/preview-svg.mjs";
 
 test("Codex analysis is materialized into a labeled non-photorealistic preview SVG", () => {
   const svg = renderPreviewSvg({
@@ -17,7 +17,7 @@ test("Codex analysis is materialized into a labeled non-photorealistic preview S
 });
 
 test("Codex prompt requests Chinese user-facing copy while keeping image prompt English", () => {
-  const source = fs.readFileSync(fileURLToPath(new URL("../server/codex-provider.mjs", import.meta.url)), "utf8");
+  const source = fs.readFileSync(fileURLToPath(new URL("../services/api/server/codex-provider.mjs", import.meta.url)), "utf8");
   assert.match(source, /user-facing strings.*Chinese/i);
   assert.match(source, /previewPrompt.*English/i);
 });

@@ -1,4 +1,6 @@
 import { CatalogProduct, TutorialLink } from "./v1-domain";
+// The native clients read this catalog via the Server API. The Web keeps this
+// compile-time copy until it migrates to the same read-only catalog endpoints.
 
 export const products: CatalogProduct[] = [
   { id: 1, brand: "Rare Beauty", name: "Soft Pinch Liquid Blush · Hope", type: "腮红", price: "$25", tone: "暖杏粉 · 自然光泽", shade: "Hope", skin: "干皮 / 混合皮", region: "欧美", latest: true, color: "#d78b78", url: "https://www.rarebeauty.com/products/soft-pinch-liquid-blush", categoryId: "blush", undertone: "warm", finish: "自然光泽", skinTags: ["dry", "combination"], shadeDepth: 3 },

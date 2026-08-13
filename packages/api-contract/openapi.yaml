@@ -29,6 +29,22 @@ paths:
       responses:
         '200': { $ref: '#/components/responses/StateResponse' }
         '409': { $ref: '#/components/responses/ErrorResponse' }
+    patch:
+      summary: Apply one named user-state operation while retaining snapshot compatibility
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/ToggleSavedProductOperation'
+                - $ref: '#/components/schemas/UpdateSettingsOperation'
+                - $ref: '#/components/schemas/AddFeedbackOperation'
+      responses:
+        '200': { $ref: '#/components/responses/StateResponse' }
+        '409': { $ref: '#/components/responses/ErrorResponse' }
   /api/catalog/products:
     get:
       summary: Authenticated product catalog used by all clients
@@ -95,8 +111,24 @@ components:
       properties:
         jobId: { type: string }
         status: { type: string, enum: [queued, running, completed, failed] }
-        result: {}
+        result: { $ref: '#/components/schemas/AnalysisResult' }
         error: { type: [string, 'null'] }
+    AnalysisResult:
+      type: [object, 'null']
+      additionalProperties: true
+    StateSnapshot:
+      type: object
+      required: [version, revision, savedProductIds, analyses, feedback, settings]
+      properties:
+        version: { type: integer }
+        revision: { type: integer }
+        authenticated: { type: boolean }
+        user: { type: object, additionalProperties: true }
+        savedProductIds: { type: array, items: { type: integer } }
+        analyses: { type: array, items: { type: object, additionalProperties: true } }
+        photos: { type: array, items: { type: object, additionalProperties: true } }
+        feedback: { type: array, items: { type: object, additionalProperties: true } }
+        settings: { type: object, additionalProperties: true }
     Product:
       type: object
       required: [id, brand, name, type, price, tone, shade, region, color, url, categoryId, undertone, finish, skinTags]
@@ -125,6 +157,24 @@ components:
         tags: { type: string }
         url: { type: string, format: uri }
         productIds: { type: array, items: { type: integer } }
+    ToggleSavedProductOperation:
+      type: object
+      required: [operation, productId]
+      properties:
+        operation: { const: toggleSavedProduct }
+        productId: { type: integer }
+    UpdateSettingsOperation:
+      type: object
+      required: [operation, settings]
+      properties:
+        operation: { const: updateSettings }
+        settings: { type: object, additionalProperties: true }
+    AddFeedbackOperation:
+      type: object
+      required: [operation, feedback]
+      properties:
+        operation: { const: addFeedback }
+        feedback: { type: object, additionalProperties: true }
     ProductListEnvelope:
       type: object
       required: [ok, data, meta]
@@ -139,6 +189,13 @@ components:
         ok: { const: true }
         data: { type: array, items: { $ref: '#/components/schemas/Tutorial' } }
         meta: { type: object }
+    StateEnvelope:
+      type: object
+      required: [ok, data, meta]
+      properties:
+        ok: { const: true }
+        data: { $ref: '#/components/schemas/StateSnapshot' }
+        meta: { type: object, required: [requestId], properties: { requestId: { type: string } } }
     ErrorEnvelope:
       type: object
       required: [ok, error, meta]
@@ -154,7 +211,9 @@ components:
         meta: { type: object, required: [requestId], properties: { requestId: { type: string } } }
   responses:
     BootstrapResponse: { description: Bootstrap envelope }
-    StateResponse: { description: State envelope }
+    StateResponse:
+      description: State envelope
+      content: { application/json: { schema: { $ref: '#/components/schemas/StateEnvelope' } } }
     AnalysisJobResponse:
       description: Analysis job envelope
       content: { application/json: { schema: { $ref: '#/components/schemas/AnalysisJob' } } }

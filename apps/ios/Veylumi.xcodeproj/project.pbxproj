@@ -9,7 +9,10 @@
 /* Begin PBXBuildFile section */
 		27D375E137E29DA55F3D2777 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC46774BBEC8EA89C89CC6AC /* RootView.swift */; };
 		3FC064B4111140A87FFBEFC7 /* VeylumiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D413D2DBB69FAD562C25ED4 /* VeylumiTests.swift */; };
+		42467672AA20B0F2848E302A /* RecommendationRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = E316A5A6E5B5D9425D8079D5 /* RecommendationRules.swift */; };
+		52EDC20849D700AC8A8A94DE /* PlatformContract.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4CCF1A2C262DFA1EC2DBA9 /* PlatformContract.swift */; };
 		5AAAF788E066306FB6C48F4B /* VeylumiAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15327816A2D9696BC1345E17 /* VeylumiAPIClient.swift */; };
+		5D9FF8296077353E106B42AF /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BDB6C728A569BFD5567B98 /* DesignTokens.swift */; };
 		74DDA7B2D3A958A831F0239B /* VeylumiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3520E70482BD9E35BE1E8F01 /* VeylumiApp.swift */; };
 		E1E676DC7D2A778F9176979F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2752616ACEAC94B351FAD272 /* Localizable.strings */; };
 		FDB2C31F0A85DEEC4F439E24 /* AnalysisViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6FD31ADA715C462603A657 /* AnalysisViewModel.swift */; };
@@ -27,20 +30,26 @@
 
 /* Begin PBXFileReference section */
 		0682A53B89FD9BA5A6F37264 /* Veylumi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Veylumi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0F4CCF1A2C262DFA1EC2DBA9 /* PlatformContract.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformContract.swift; sourceTree = "<group>"; };
 		15327816A2D9696BC1345E17 /* VeylumiAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VeylumiAPIClient.swift; sourceTree = "<group>"; };
 		22DA44F7DF2E04EE36CF2E74 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		3520E70482BD9E35BE1E8F01 /* VeylumiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VeylumiApp.swift; sourceTree = "<group>"; };
+		77BDB6C728A569BFD5567B98 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		942BEA5CE65FF759DCBEF354 /* VeylumiTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VeylumiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D413D2DBB69FAD562C25ED4 /* VeylumiTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VeylumiTests.swift; sourceTree = "<group>"; };
 		B59C069E7807C6DF4C8FCA87 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		BC46774BBEC8EA89C89CC6AC /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		DA6FD31ADA715C462603A657 /* AnalysisViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisViewModel.swift; sourceTree = "<group>"; };
+		E316A5A6E5B5D9425D8079D5 /* RecommendationRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationRules.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		0109C80830522B2CD12D44BF /* Veylumi */ = {
 			isa = PBXGroup;
 			children = (
+				77BDB6C728A569BFD5567B98 /* DesignTokens.swift */,
+				0F4CCF1A2C262DFA1EC2DBA9 /* PlatformContract.swift */,
+				E316A5A6E5B5D9425D8079D5 /* RecommendationRules.swift */,
 				89C3A054F1A25B013AE542E7 /* API */,
 				4573E63353EE3DE515BA637C /* App */,
 				A69FECEFA4D500101F06F8DE /* Resources */,
@@ -204,6 +213,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				FDB2C31F0A85DEEC4F439E24 /* AnalysisViewModel.swift in Sources */,
+				5D9FF8296077353E106B42AF /* DesignTokens.swift in Sources */,
+				52EDC20849D700AC8A8A94DE /* PlatformContract.swift in Sources */,
+				42467672AA20B0F2848E302A /* RecommendationRules.swift in Sources */,
 				27D375E137E29DA55F3D2777 /* RootView.swift in Sources */,
 				5AAAF788E066306FB6C48F4B /* VeylumiAPIClient.swift in Sources */,
 				74DDA7B2D3A958A831F0239B /* VeylumiApp.swift in Sources */,

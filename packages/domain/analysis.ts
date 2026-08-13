@@ -1,3 +1,5 @@
+import { recommendationRules } from "../recommendation-contract/generated";
+
 export type SkinProfile = "dry" | "oily" | "combination" | "normal" | "unknown";
 
 export type CatalogProduct = {
@@ -63,13 +65,14 @@ export type SkinObservation = { summary: string; areas: string[]; caveat: string
 export type PreviewPrompt = { prompt: string; negativePrompt: string; preserveIdentity: boolean; disclosure: string };
 
 export function matchProduct(product: CatalogProduct, context: RecommendationContext): ProductMatch {
-  let score = 48;
+  const weights = recommendationRules.weights;
+  let score = weights.base;
   const reasons: string[] = [];
-  if (context.undertone !== "unknown" && product.undertone === context.undertone) { score += 20; reasons.push("undertone 接近"); }
-  if (context.skin !== "unknown" && product.skinTags.includes(context.skin)) { score += 15; reasons.push("肤质标签匹配"); }
-  if (context.region === "全部品牌" || product.region === context.region) { score += 10; reasons.push("市场可购买"); }
-  if (!context.categoryId || product.categoryId === context.categoryId) { score += 7; reasons.push("品类匹配"); }
-  return { product, score: Math.min(score, 99), reason: reasons.join(" · ") || "基于妆容方向的参考推荐", caveat: "色号会受光线、底妆和质地影响，建议购买前查看官方试色或线下试用。" };
+  if (context.undertone !== "unknown" && product.undertone === context.undertone) { score += weights.undertone; reasons.push("undertone 接近"); }
+  if (context.skin !== "unknown" && product.skinTags.includes(context.skin)) { score += weights.skin; reasons.push("肤质标签匹配"); }
+  if (context.region === "全部品牌" || product.region === context.region) { score += weights.region; reasons.push("市场可购买"); }
+  if (!context.categoryId || product.categoryId === context.categoryId) { score += weights.category; reasons.push("品类匹配"); }
+  return { product, score: Math.min(score, weights.max), reason: reasons.join(" · ") || "基于妆容方向的参考推荐", caveat: "色号会受光线、底妆和质地影响，建议购买前查看官方试色或线下试用。" };
 }
 
 export function rankProducts(products: CatalogProduct[], context: RecommendationContext): ProductMatch[] {

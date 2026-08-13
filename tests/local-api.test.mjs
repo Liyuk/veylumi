@@ -95,6 +95,22 @@ test("state POST with If-Match conflict is rejected", async () => {
   }
 });
 
+test("state PATCH applies one named operation with revision protection", async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "veylumi-state-patch-"));
+  const { createJsonRepository } = await import("../services/api/server/local-repository.mjs");
+  const app = createApp({ repository: createJsonRepository(path.join(dir, "state.json")), previewStore: createPreviewStore({ dir: path.join(dir, "preview") }), queueOptions: { runner: async () => ({}) } });
+  await app.start(0);
+  try {
+    const base = `http://127.0.0.1:${app.server.address().port}`;
+    const headers = { authorization: `Bearer ${app.apiToken}` };
+    const before = (await (await fetch(`${base}/api/state`, { headers })).json()).data;
+    const response = await fetch(`${base}/api/state`, { method: "PATCH", headers: { ...headers, "content-type": "application/json", "if-match": String(before.revision) }, body: JSON.stringify({ operation: "toggleSavedProduct", productId: 2 }) });
+    const result = await response.json();
+    assert.equal(response.status, 200);
+    assert.ok(result.data.savedProductIds.includes(2));
+  } finally { app.server.close(); await rm(dir, { recursive: true, force: true }); }
+});
+
 test("analyze returns 202 and idempotent replay returns 200", async () => {
   const { app, base, token, dir } = await setup();
   try {

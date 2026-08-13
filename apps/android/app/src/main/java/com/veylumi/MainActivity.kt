@@ -29,10 +29,10 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-private val Ink = Color(0xFF2A2624)
-private val Paper = Color(0xFFFFFBF8)
-private val Blush = Color(0xFFF1D6CE)
-private val Moss = Color(0xFF516657)
+private val Ink = DesignTokens.Ink
+private val Paper = DesignTokens.Surface
+private val Blush = DesignTokens.Blush
+private val Moss = DesignTokens.Moss
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(state: Bundle?) {

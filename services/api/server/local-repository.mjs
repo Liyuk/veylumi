@@ -80,6 +80,14 @@ export function createJsonRepository(filePath = path.resolve(".data/veylumi.json
         return write(next);
       });
     },
+    async update(mutator, { expectedRevision } = {}) {
+      return transaction(async () => {
+        const current = await read();
+        if (expectedRevision !== undefined && Number(current.revision) !== Number(expectedRevision)) throw new ConflictError();
+        const next = { ...normalizeState(mutator(current)), revision: Number(current.revision) + 1 };
+        return write(next);
+      });
+    },
     async append(collection, value) {
       return transaction(async () => {
         const current = await read();

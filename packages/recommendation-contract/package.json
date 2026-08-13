@@ -1,0 +1,6 @@
+{
+  "name": "@veylumi/recommendation-contract",
+  "private": true,
+  "type": "module",
+  "scripts": { "generate": "node generate-platform-resources.mjs" }
+}

@@ -56,7 +56,7 @@ export function createApp({
 
   function json(res, status, body, requestId, origin) {
     const headers = `content-type,authorization,idempotency-key,x-request-id,if-match${mode === "demo" ? ",x-admin-token" : ""}`;
-    res.writeHead(status, { "content-type": "application/json; charset=utf-8", "access-control-allow-origin": corsOriginFor(origin), "access-control-allow-headers": headers, "access-control-allow-methods": "GET,POST,OPTIONS", "vary": "Origin", "x-request-id": requestId });
+    res.writeHead(status, { "content-type": "application/json; charset=utf-8", "access-control-allow-origin": corsOriginFor(origin), "access-control-allow-headers": headers, "access-control-allow-methods": "GET,POST,PATCH,OPTIONS", "vary": "Origin", "x-request-id": requestId });
     if (status === 204) return res.end();
     res.end(JSON.stringify(body));
   }
@@ -82,7 +82,7 @@ export function createApp({
   function corsHeaders(res, origin) {
     res.setHeader("access-control-allow-origin", corsOriginFor(origin));
     res.setHeader("access-control-allow-headers", `content-type,authorization,idempotency-key,x-request-id,if-match${mode === "demo" ? ",x-admin-token" : ""}`);
-    res.setHeader("access-control-allow-methods", "GET,POST,OPTIONS");
+    res.setHeader("access-control-allow-methods", "GET,POST,PATCH,OPTIONS");
     res.setHeader("vary", "Origin");
   }
 
@@ -100,6 +100,19 @@ export function createApp({
       requireApiAccess(req);
       const expectedRevision = typeof req.headers["if-match"] === "string" ? Number(req.headers["if-match"]) : undefined;
       return { status: 200, data: await repository.replace(await readJson(req), { expectedRevision }) };
+    }
+    if (url.pathname === "/api/state" && req.method === "PATCH") {
+      requireApiAccess(req);
+      const expectedRevision = typeof req.headers["if-match"] === "string" ? Number(req.headers["if-match"]) : undefined;
+      const command = await readJson(req);
+      if (expectedRevision === undefined || Number.isNaN(expectedRevision)) throw new ApiError(400, ERROR_CODES.INVALID_STATE, "If-Match revision is required");
+      const next = await repository.update((state) => {
+        if (command.operation === "toggleSavedProduct" && Number.isInteger(command.productId)) return { ...state, savedProductIds: state.savedProductIds.includes(command.productId) ? state.savedProductIds.filter((id) => id !== command.productId) : [...state.savedProductIds, command.productId] };
+        if (command.operation === "updateSettings" && command.settings && typeof command.settings === "object") return { ...state, settings: { ...state.settings, ...command.settings }, user: { ...state.user, displayName: command.settings.displayName ?? state.user.displayName, email: command.settings.email ?? state.user.email } };
+        if (command.operation === "addFeedback" && typeof command.feedback === "object") return { ...state, feedback: [...state.feedback, { id: randomUUID(), createdAt: new Date().toISOString(), ...command.feedback }] };
+        throw new ApiError(400, ERROR_CODES.INVALID_STATE, "Unsupported state operation");
+      }, { expectedRevision });
+      return { status: 200, data: next };
     }
     if (url.pathname === "/api/catalog/products" && req.method === "GET") { requireApiAccess(req); return { status: 200, data: products }; }
     if (url.pathname === "/api/catalog/tutorials" && req.method === "GET") { requireApiAccess(req); return { status: 200, data: tutorials }; }

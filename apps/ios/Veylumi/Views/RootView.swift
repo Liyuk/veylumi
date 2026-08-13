@@ -1,9 +1,9 @@
 import SwiftUI
 import PhotosUI
 
-private let ink = Color(red: 0.16, green: 0.15, blue: 0.14)
-private let blush = Color(red: 0.95, green: 0.84, blue: 0.80)
-private let moss = Color(red: 0.32, green: 0.40, blue: 0.34)
+private let ink = DesignTokens.ink
+private let blush = DesignTokens.blush
+private let moss = DesignTokens.moss
 
 struct RootView: View {
     @EnvironmentObject private var model: AnalysisViewModel

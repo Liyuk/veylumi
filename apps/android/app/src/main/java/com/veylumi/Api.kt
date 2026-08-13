@@ -25,7 +25,7 @@ import kotlinx.serialization.json.*
 
 class VeylumiApiException(val code: String, override val message: String) : Exception(message)
 
-class VeylumiApiClient(private var baseUrl: String = "http://10.0.2.2:8787") {
+class VeylumiApiClient(private var baseUrl: String = PlatformContract.apiBaseUrl) {
     private val json = Json { ignoreUnknownKeys = true; explicitNulls = false }
     private val http = HttpClient(CIO) { install(ContentNegotiation) { json(json) } }
     private var token: String? = null
@@ -45,6 +45,7 @@ class VeylumiApiClient(private var baseUrl: String = "http://10.0.2.2:8787") {
     suspend fun products() = request<List<Product>>("/api/catalog/products")
     suspend fun tutorials() = request<List<Tutorial>>("/api/catalog/tutorials")
     suspend fun save(state: StateSnapshot) = request<StateSnapshot>("/api/state", "POST", json.encodeToJsonElement(state), mapOf(HttpHeaders.IfMatch to state.revision.toString()))
+    suspend fun applyStateOperation(operation: JsonObject, revision: Long) = request<StateSnapshot>("/api/state", "PATCH", operation, mapOf(HttpHeaders.IfMatch to revision.toString()))
     suspend fun analyze(imageData: String, filename: String, mimeType: String, size: Long, key: String): AnalysisJob = request("/api/analyze", "POST", buildJsonObject { put("imageData", imageData); put("filename", filename); put("mimeType", mimeType); put("size", size) }, mapOf("Idempotency-Key" to key))
     suspend fun job(id: String) = request<AnalysisJob>("/api/analyze/${java.net.URLEncoder.encode(id, "UTF-8")}")
     suspend fun preview(id: String): ByteArray { val response = http.get("$baseUrl/api/analyze/${java.net.URLEncoder.encode(id, "UTF-8")}/preview") { header(HttpHeaders.Authorization, "Bearer ${auth()}") }; if (!response.status.value.let { it in 200..299 }) throw VeylumiApiException("API_PREVIEW_ERROR", "Preview unavailable"); return response.body() }

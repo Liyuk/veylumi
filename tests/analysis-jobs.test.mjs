@@ -35,16 +35,22 @@ test("analysis jobs are persisted, idempotent, retried, and non-blocking", async
   await rm(directory, { recursive: true, force: true });
 });
 
-test("running jobs recover as queued after a process restart", async () => {
+test("in-progress jobs fail safely after a process restart without their image input", async () => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "veylumi-jobs-recovery-"));
   const filePath = path.join(directory, "jobs.json");
-  const queue = createAnalysisQueue({ filePath, runner: async () => ({ ok: true }) });
+  let releaseRunner;
+  const queue = createAnalysisQueue({ filePath, runner: async () => new Promise((resolve) => { releaseRunner = resolve; }) });
   await queue.ready;
   const job = await queue.create({ filename: "face.jpeg" }, { idempotencyKey: "recovery" });
-  await new Promise((resolve) => setTimeout(resolve, 5));
+  for (let attempt = 0; attempt < 20 && queue.get(job.jobId).status !== "running"; attempt += 1) await new Promise((resolve) => setTimeout(resolve, 5));
+  assert.equal(queue.get(job.jobId).status, "running");
   const recovered = createAnalysisQueue({ filePath, runner: async () => ({ recovered: true }) });
   await recovered.ready;
-  assert.equal(recovered.get(job.jobId).status, "completed");
+  assert.equal(recovered.get(job.jobId).status, "failed");
+  assert.equal(recovered.get(job.jobId).error, "服务重启后图片输入已不可用，请重新上传");
+  releaseRunner?.({ ok: true });
+  for (let attempt = 0; attempt < 20 && queue.get(job.jobId).status !== "completed"; attempt += 1) await new Promise((resolve) => setTimeout(resolve, 5));
+  await queue.flush();
   await rm(directory, { recursive: true, force: true });
 });
 

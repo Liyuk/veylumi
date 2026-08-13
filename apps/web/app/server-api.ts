@@ -1,8 +1,9 @@
 import { LocalDb } from "./local-db";
 import { createAnalysisWaiter } from "../../../services/api/server/wait-analysis.mjs";
-import type { AnalysisJob as ContractAnalysisJob, ApiFailure as ContractApiFailure, ApiMeta as ContractApiMeta, ApiSuccess as ContractApiSuccess } from "../../../packages/api-contract/generated/types";
+import type { AnalysisJob as ContractAnalysisJob, ApiFailure as ContractApiFailure, ApiMeta as ContractApiMeta, ApiSuccess as ContractApiSuccess, StateOperation } from "../../../packages/api-contract/generated/types";
+import { platformContract } from "../../../packages/client-contract/generated";
 
-const API_BASE = process.env.NEXT_PUBLIC_VEYLUMI_API_URL ?? "http://127.0.0.1:8787";
+const API_BASE = process.env.NEXT_PUBLIC_VEYLUMI_API_URL ?? platformContract.api.defaultWebUrl;
 let apiToken: string | null = null;
 let writeQueue: Promise<LocalDb> = Promise.resolve({ version: 1, revision: 0 } as LocalDb);
 
@@ -75,6 +76,16 @@ export function saveDb(db: LocalDb): Promise<LocalDb> {
     });
   writeQueue = run;
   return writeQueue;
+}
+
+// 高频小改动使用同一 state 资源上的命名 operation；整库 POST 仍仅为旧客户端兼容保留。
+export async function applyStateOperation(operation: StateOperation, revision: number): Promise<LocalDb> {
+  const attempt = (expectedRevision: number) => request<LocalDb>("/api/state", { method: "PATCH", body: JSON.stringify(operation), headers: { "if-match": String(expectedRevision) } });
+  try { return await attempt(revision); }
+  catch (error) {
+    if (error instanceof ServerApiError && error.status === 409) return attempt((await fetchDb()).revision);
+    throw error;
+  }
 }
 
 // 冲突合并：集合按 id 去重做并集，savedProductIds 取并集，settings/用户取较新的本地值。

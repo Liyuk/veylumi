@@ -1,0 +1,6 @@
+{
+  "name": "@veylumi/design-tokens",
+  "private": true,
+  "type": "module",
+  "scripts": { "generate": "node generate-platform-resources.mjs" }
+}

@@ -1,66 +1,9 @@
-/* Veylumi brand layer: identity tokens live separately from Radix Themes. */
+/* Brand fonts complement generated cross-platform design tokens. */
+@import "./generated-tokens.css";
+
 :root {
-  --veylumi-canvas: #faf9f7;
   --veylumi-font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", Roboto, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
   --veylumi-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --veylumi-surface: #ffffff;
-  --veylumi-surface-warm: #f5f1ed;
-  --veylumi-surface-blush: #f3e8e1;
-  --veylumi-ink: #24211f;
-  --veylumi-ink-soft: #746d68;
-  --veylumi-ink-muted: #a59b94;
-  --veylumi-line: #e7e0da;
-  --veylumi-accent: #b7654d;
-  --veylumi-accent-hover: #9f513e;
-  --veylumi-accent-muted: #a26450;   /* admin 强调文本/错误码 */
-  --veylumi-accent-ink: #ffffff;
-  --veylumi-success: #6f8e68;
-  --veylumi-warning: #a97943;
-  --veylumi-danger: #b45b55;
-  --veylumi-plum: #3e2931;
-
-  /* 高频语义色（从 UI 实际使用中提取，值不变以保持零视觉位移） */
-  --veylumi-ink-faint: #aaa099;      /* 次级说明文字 */
-  --veylumi-ink-muted-2: #a0968f;    /* 图标/弱文字 */
-  --veylumi-ink-soft-2: #806f67;     /* 正文强调色 */
-  --veylumi-ink-label: #98887d;      /* 设置项说明 */
-  --veylumi-ink-fg-soft: #6d625c;    /* 账号名 */
-  --veylumi-line-soft: #e7ddd6;      /* 卡片描边 */
-  --veylumi-line-warm: #eee3dc;      /* 设置分割线 */
-  --veylumi-line-deep: #e8e0da;      /* admin 面板描边 */
-  --veylumi-surface-glass: #fffaf4d9; /* 浮层半透明白 */
-  --veylumi-surface-cream: #fffdfa;  /* 输入框底 */
-  --veylumi-surface-peach: #fffaf7;  /* 卡片底 */
-  --veylumi-focus-ring: #b7654d;   /* 焦点描边（实色，WCAG 焦点对比 ≥3:1） */
-  --veylumi-avatar: #c68d75;         /* 头像底色 */
-  --veylumi-icon-faint: #b7aaa2;     /* 弱图标 */
-  --veylumi-icon-muted: #a99b92;     /* 次要图标 */
-  --veylumi-space-1: 4px;
-  --veylumi-space-2: 8px;
-  --veylumi-space-3: 12px;
-  --veylumi-space-4: 16px;
-  --veylumi-space-5: 24px;
-  --veylumi-space-6: 32px;
-  --veylumi-space-7: 48px;
-  --veylumi-space-8: 64px;
-  --veylumi-radius-sm: 8px;
-  --veylumi-radius-md: 12px;
-  --veylumi-radius-lg: 20px;
-  --veylumi-radius-pill: 999px;
-  /* 组件级半径（取自 UI 实际使用值，保持零视觉位移） */
-  --veylumi-radius-card: 14px;      /* 产品卡片 */
-  --veylumi-radius-control: 10px;   /* 输入/触发器/反馈条 */
-  --veylumi-radius-tight: 9px;      /* 导航项/内嵌面板 */
-  --veylumi-shadow-card: 0 3px 14px rgb(83 61 48 / 5%);
-  --veylumi-shadow-float: 0 12px 40px rgb(83 61 48 / 8%);
-
-  /* Type scale: display / page / section / body / metadata */
-  --veylumi-type-display: 64px;
-  --veylumi-type-page: 44px;
-  --veylumi-type-section: 28px;
-  --veylumi-type-card: 18px;
-  --veylumi-type-body: 14px;
-  --veylumi-type-meta: 12px;
 }
 
 [data-radix-theme] {

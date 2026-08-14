@@ -8,6 +8,7 @@ import SwiftUI
     @Published private(set) var snapshot: StateSnapshot?
     @Published private(set) var products: [Product] = []
     @Published private(set) var tutorials: [Tutorial] = []
+    @Published private(set) var recommendations: RecommendationResponse?
     @Published private(set) var report: AnalysisJob?
     @Published private(set) var errorMessage: String?
     @Published private(set) var isLoading = true
@@ -16,12 +17,15 @@ import SwiftUI
 
     func refresh() async {
         isLoading = true; errorMessage = nil
-        do { async let state = api.state(); async let catalog = api.products(); async let guides = api.tutorials(); snapshot = try await state; products = try await catalog; tutorials = try await guides }
+        do { async let state = api.state(); async let catalog = api.products(); async let guides = api.tutorials(); async let picks = api.recommendations(); snapshot = try await state; products = try await catalog; tutorials = try await guides; recommendations = try await picks }
         catch { errorMessage = error.localizedDescription }
         isLoading = false
     }
     func upload(_ item: PhotosPickerItem?) async {
         guard let item, let data = try? await item.loadTransferable(type: Data.self) else { return }
+        await upload(data)
+    }
+    func upload(_ data: Data) async {
         guard data.count <= PlatformContract.maxUploadBytes else { status = .failed("Please choose an image smaller than 10 MB."); return }
         let mimeType = data.starts(with: [0xFF, 0xD8]) ? "image/jpeg" : data.starts(with: [0x52, 0x49, 0x46, 0x46]) ? "image/webp" : "image/png"
         guard PlatformContract.mimeTypes.contains(mimeType) else { status = .failed("Unsupported image format."); return }

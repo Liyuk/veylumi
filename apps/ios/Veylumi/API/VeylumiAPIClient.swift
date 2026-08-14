@@ -8,6 +8,8 @@ struct Tutorial: Codable, Identifiable { let platform: String; let creator: Stri
 struct UserSettings: Codable { var displayName: String; var email: String; var region: String; var language: String; var skinProfile: String; var undertone: String; var savePhotosForThreeDays: Bool; var personalizedTutorials: Bool }
 struct StateSnapshot: Codable { var version: Int; var revision: Int; var authenticated: Bool; var user: [String: JSONValue]; var savedProductIds: [Int]; var analyses: [[String: JSONValue]]; var photos: [[String: JSONValue]]; var feedback: [[String: JSONValue]]; var settings: UserSettings }
 struct AnalysisJob: Codable { let jobId: String; let status: String; let result: [String: JSONValue]?; let error: String? }
+struct RecommendationItem: Codable, Identifiable { let productId: Int; let score: Int; let reason: String; let caveat: String; var id: Int { productId } }
+struct RecommendationResponse: Codable { let items: [RecommendationItem]; let ruleVersion: Int; let modelVersion: String; let fallback: Bool; let cached: Bool; let degraded: String? }
 
 enum APIError: LocalizedError {
     case unavailable(String), conflict(String)
@@ -23,6 +25,7 @@ final class VeylumiAPIClient {
     func state() async throws -> StateSnapshot { try await request("/api/state", method: "GET") }
     func products() async throws -> [Product] { try await request("/api/catalog/products", method: "GET") }
     func tutorials() async throws -> [Tutorial] { try await request("/api/catalog/tutorials", method: "GET") }
+    func recommendations() async throws -> RecommendationResponse { try await request("/api/recommendations?limit=3", method: "GET") }
     func saveState(_ state: StateSnapshot) async throws -> StateSnapshot { try await request("/api/state", method: "POST", body: JSONEncoder().encode(state), headers: ["If-Match": String(state.revision)]) }
     func applyStateOperation(_ operation: [String: JSONValue], revision: Int) async throws -> StateSnapshot { try await request("/api/state", method: "PATCH", body: JSONEncoder().encode(operation), headers: ["If-Match": String(revision)]) }
     func analyze(imageData: String, filename: String, mimeType: String, size: Int, idempotencyKey: String = UUID().uuidString) async throws -> AnalysisJob { let input: [String: JSONValue] = ["imageData": .string(imageData), "filename": .string(filename), "mimeType": .string(mimeType), "size": .number(Double(size))]; return try await request("/api/analyze", method: "POST", body: JSONEncoder().encode(input), headers: ["Idempotency-Key": idempotencyKey]) }

@@ -3,6 +3,7 @@
 
 :root {
   --veylumi-font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", Roboto, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+  --veylumi-font-display: Iowan Old Style, Baskerville, "Times New Roman", "Songti SC", STSong, serif;
   --veylumi-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 

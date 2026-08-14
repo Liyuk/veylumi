@@ -1,6 +1,6 @@
 import { LocalDb } from "./local-db";
 import { createAnalysisWaiter } from "../../../services/api/server/wait-analysis.mjs";
-import type { AnalysisJob as ContractAnalysisJob, ApiFailure as ContractApiFailure, ApiMeta as ContractApiMeta, ApiSuccess as ContractApiSuccess, StateOperation } from "../../../packages/api-contract/generated/types";
+import type { AnalysisJob as ContractAnalysisJob, ApiFailure as ContractApiFailure, ApiMeta as ContractApiMeta, ApiSuccess as ContractApiSuccess, RecommendationResponse, StateOperation } from "../../../packages/api-contract/generated/types";
 import { platformContract } from "../../../packages/client-contract/generated";
 
 const API_BASE = process.env.NEXT_PUBLIC_VEYLUMI_API_URL ?? platformContract.api.defaultWebUrl;
@@ -56,6 +56,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export function fetchDb(): Promise<LocalDb> {
   return request<LocalDb>("/api/state");
+}
+
+export function fetchRecommendations(): Promise<RecommendationResponse> {
+  return request<RecommendationResponse>("/api/recommendations?limit=3");
 }
 
 // 带乐观锁的整库保存：If-Match 携带当前 revision，服务端不匹配返回 409。

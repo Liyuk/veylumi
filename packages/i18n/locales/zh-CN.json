@@ -215,6 +215,7 @@
   "report.visibleSkin": "可见肤质",
   "report.bestDirection": "最适合你的方向",
   "report.recommendationFallback": "均匀底妆、眼尾自然拉长和低饱和暖色唇妆会更适合你。避免过重鼻影和高对比修容。",
+  "analysis.camera": "立即拍摄",
   "report.makeupPlan": "照着做就好",
   "report.photoRetention": "照片保存",
   "report.retentionDescription": "本地记录会保存照片元数据；照片默认立即标记删除，选择保留时最多 3 天。",
@@ -263,5 +264,7 @@
   "catalog.product": "商品",
   "catalog.eastAsia": "日韩",
   "catalog.western": "欧美",
-  "catalog.allBrands": "全部品牌"
+  "catalog.allBrands": "全部品牌",
+  "navigation.forYou": "为你",
+  "navigation.me": "我的"
 }

@@ -93,3 +93,16 @@ test("recommendation base weights are generated for Web, Android, and iOS", asyn
   assert.match(android, /undertone = 20/);
   assert.match(ios, /undertone = 20/);
 });
+
+test("all client shells use the shared three-destination beauty navigation", async () => {
+  const [web, android, ios] = await Promise.all([
+    readFile(new URL("../apps/web/app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../apps/android/app/src/main/java/com/veylumi/MainActivity.kt", import.meta.url), "utf8"),
+    readFile(new URL("../apps/ios/Veylumi/Views/RootView.swift", import.meta.url), "utf8"),
+  ]);
+  for (const source of [web, android, ios]) {
+    assert.match(source, /forYou/);
+    assert.match(source, /analyze/);
+    assert.match(source, /me/);
+  }
+});

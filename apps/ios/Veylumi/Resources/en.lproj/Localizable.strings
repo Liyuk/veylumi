@@ -33,6 +33,7 @@
 "analysis.asyncDescription" = "This may take a few seconds because analysis and image preview run asynchronously.";
 "analysis.avoid" = "Avoid: ";
 "analysis.avoidFilters" = "Avoid strong filters, backlighting, and heavy retouching.";
+"analysis.camera" = "Take photo";
 "analysis.choosePhoto" = "Choose photo";
 "analysis.colorSeason" = "Color season";
 "analysis.defaultDelete" = "Photos are marked for immediate deletion by default; you can keep them for 3 days.";
@@ -113,10 +114,12 @@
 "library.stepsLinked" = "Steps linked";
 "library.title" = "Find the one that fits you.";
 "navigation.analyze" = "Start analysis";
+"navigation.forYou" = "For you";
 "navigation.history" = "Analysis history";
 "navigation.language" = "中 / EN";
 "navigation.library" = "Products & tutorials";
 "navigation.main" = "Main navigation";
+"navigation.me" = "Me";
 "navigation.overview" = "Overview";
 "navigation.saved" = "Saved items";
 "navigation.workspace" = "WORKSPACE";

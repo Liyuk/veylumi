@@ -38,6 +38,7 @@
   "analysis.photoTip": "No obstructions, natural light recommended",
   "analysis.localDemo": "Local demo",
   "analysis.goodPhoto": "A good photo makes the recommendations more reliable.",
+  "analysis.camera": "Take photo",
   "analysis.singleFace": "Single front-facing person",
   "analysis.multipleFaces": "Analysis stops when multiple faces are detected.",
   "analysis.naturalLight": "Natural light",
@@ -263,5 +264,7 @@
   "catalog.product": "product",
   "catalog.eastAsia": "East Asia",
   "catalog.western": "Western",
-  "catalog.allBrands": "All brands"
+  "catalog.allBrands": "All brands",
+  "navigation.forYou": "For you",
+  "navigation.me": "Me"
 }

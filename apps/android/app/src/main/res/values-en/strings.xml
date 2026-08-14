@@ -35,6 +35,7 @@
   <string name="analysis_asyncDescription">This may take a few seconds because analysis and image preview run asynchronously.</string>
   <string name="analysis_avoid">Avoid: </string>
   <string name="analysis_avoidFilters">Avoid strong filters, backlighting, and heavy retouching.</string>
+  <string name="analysis_camera">Take photo</string>
   <string name="analysis_choosePhoto">Choose photo</string>
   <string name="analysis_colorSeason">Color season</string>
   <string name="analysis_defaultDelete">Photos are marked for immediate deletion by default; you can keep them for 3 days.</string>
@@ -115,10 +116,12 @@
   <string name="library_stepsLinked">Steps linked</string>
   <string name="library_title">Find the one that fits you.</string>
   <string name="navigation_analyze">Start analysis</string>
+  <string name="navigation_forYou">For you</string>
   <string name="navigation_history">Analysis history</string>
   <string name="navigation_language">中 / EN</string>
   <string name="navigation_library">Products &amp; tutorials</string>
   <string name="navigation_main">Main navigation</string>
+  <string name="navigation_me">Me</string>
   <string name="navigation_overview">Overview</string>
   <string name="navigation_saved">Saved items</string>
   <string name="navigation_workspace">WORKSPACE</string>

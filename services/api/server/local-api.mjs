@@ -172,7 +172,7 @@ export function createApp({
       if (!job) throw new ApiError(404, ERROR_CODES.NOT_FOUND, "分析任务不存在");
       return { status: 200, data: job };
     }
-    if (url.pathname === "/api/admin/metrics" && req.method === "GET") { requireAdmin(req); return { status: 200, data: getMetrics() }; }
+    if (url.pathname === "/api/admin/metrics" && req.method === "GET") { requireAdmin(req); return { status: 200, data: { ...getMetrics(), recommendation: recommendationGateway.getMetrics?.() ?? null } }; }
     if (url.pathname === "/api/admin/logs" && req.method === "GET") { requireAdmin(req); return { status: 200, data: await getRecentLogs(Number(url.searchParams.get("limit") ?? 100)) }; }
     if (url.pathname.startsWith("/api/") && !["GET", "POST"].includes(req.method)) throw new ApiError(405, ERROR_CODES.METHOD_NOT_ALLOWED, "请求方法不支持");
     throw new ApiError(404, ERROR_CODES.NOT_FOUND, "接口不存在");

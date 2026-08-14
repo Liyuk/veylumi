@@ -20,6 +20,8 @@ import kotlinx.serialization.json.*
 @Serializable data class Product(val id: Int, val brand: String, val name: String, val type: String, val price: String, val tone: String, val shade: String, val region: String, val color: String, val url: String, val categoryId: String, val undertone: String, val finish: String, val skinTags: List<String> = emptyList())
 @Serializable data class Tutorial(val platform: String, val creator: String, val title: String, val tags: String, val url: String, val productIds: List<Int> = emptyList())
 @Serializable data class AnalysisJob(val jobId: String, val status: String, val result: JsonObject? = null, val error: String? = null)
+@Serializable data class RecommendationItem(val productId: Int, val score: Int, val reason: String, val caveat: String)
+@Serializable data class RecommendationResponse(val items: List<RecommendationItem>, val ruleVersion: Int, val modelVersion: String, val fallback: Boolean, val cached: Boolean, val degraded: String? = null)
 @Serializable data class Settings(val displayName: String = "Yuki", val email: String = "", val region: String = "中国大陆", val language: String = "zh-CN", val skinProfile: String = "未设置", val undertone: String = "未设置", val savePhotosForThreeDays: Boolean = false, val personalizedTutorials: Boolean = true)
 @Serializable data class StateSnapshot(val version: Int = 1, val revision: Long = 0, val savedProductIds: List<Int> = emptyList(), val analyses: List<JsonObject> = emptyList(), val feedback: List<JsonObject> = emptyList(), val settings: Settings = Settings(), val user: JsonObject = buildJsonObject { })
 
@@ -44,6 +46,7 @@ class VeylumiApiClient(private var baseUrl: String = PlatformContract.apiBaseUrl
     suspend fun state() = request<StateSnapshot>("/api/state")
     suspend fun products() = request<List<Product>>("/api/catalog/products")
     suspend fun tutorials() = request<List<Tutorial>>("/api/catalog/tutorials")
+    suspend fun recommendations() = request<RecommendationResponse>("/api/recommendations?limit=3")
     suspend fun save(state: StateSnapshot) = request<StateSnapshot>("/api/state", "POST", json.encodeToJsonElement(state), mapOf(HttpHeaders.IfMatch to state.revision.toString()))
     suspend fun applyStateOperation(operation: JsonObject, revision: Long) = request<StateSnapshot>("/api/state", "PATCH", operation, mapOf(HttpHeaders.IfMatch to revision.toString()))
     suspend fun analyze(imageData: String, filename: String, mimeType: String, size: Long, key: String): AnalysisJob = request("/api/analyze", "POST", buildJsonObject { put("imageData", imageData); put("filename", filename); put("mimeType", mimeType); put("size", size) }, mapOf("Idempotency-Key" to key))

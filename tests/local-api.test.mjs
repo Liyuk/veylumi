@@ -82,6 +82,18 @@ test("recommendations are served through the API gateway and fall back safely", 
   } finally { app.server.close(); await rm(dir, { recursive: true, force: true }); }
 });
 
+test("admin metrics expose recommendation service health without exposing its token", async () => {
+  const { app, base, dir } = await setup();
+  try {
+    const response = await fetch(`${base}/api/admin/metrics`, { headers: { "x-admin-token": "local-admin" } });
+    const body = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(body.data.recommendation.status, "unconfigured");
+    assert.equal(body.data.recommendation.fallbackRequests, 0);
+    assert.equal(JSON.stringify(body.data.recommendation).includes("token"), false);
+  } finally { app.server.close(); await rm(dir, { recursive: true, force: true }); }
+});
+
 test("state POST with If-Match conflict is rejected", async () => {
   const dir = await mkdtemp(path.join(os.tmpdir(), "veylumi-repo-conflict-"));
   try {

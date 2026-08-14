@@ -3,7 +3,7 @@ package com.veylumi
 import kotlinx.serialization.json.*
 
 class VeylumiRepository(private val api: VeylumiApiClient) {
-    suspend fun bootstrap(): AppData = AppData(api.state(), api.products(), api.tutorials())
+    suspend fun bootstrap(): AppData = AppData(api.state(), api.products(), api.tutorials(), api.recommendations())
     suspend fun saveWithMerge(local: StateSnapshot): StateSnapshot = try { api.save(local) } catch (error: VeylumiApiException) {
         if (error.code != "API_CONFLICT") throw error
         val remote = api.state()
@@ -20,4 +20,4 @@ class VeylumiRepository(private val api: VeylumiApiClient) {
     suspend fun poll(job: AnalysisJob, onStatus: (String) -> Unit): AnalysisJob { var current = job; val deadline = System.currentTimeMillis() + PlatformContract.pollDeadlineMs; while (current.status == "queued" || current.status == "running") { if (System.currentTimeMillis() > deadline) throw VeylumiApiException("API_TIMEOUT", "Analysis timed out."); onStatus(current.status); kotlinx.coroutines.delay(PlatformContract.pollIntervalMs); current = api.job(current.jobId) }; return current }
     private fun mergeById(remote: List<JsonObject>, local: List<JsonObject>) = (remote + local).associateBy { it["id"]?.jsonPrimitive?.content ?: java.util.UUID.randomUUID().toString() }.values.toList()
 }
-data class AppData(val state: StateSnapshot, val products: List<Product>, val tutorials: List<Tutorial>)
+data class AppData(val state: StateSnapshot, val products: List<Product>, val tutorials: List<Tutorial>, val recommendations: RecommendationResponse)

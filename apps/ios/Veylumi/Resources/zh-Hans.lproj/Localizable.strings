@@ -33,6 +33,7 @@
 "analysis.asyncDescription" = "这一步可能需要几十秒，因为分析和图像预览是异步完成的。";
 "analysis.avoid" = "避免：";
 "analysis.avoidFilters" = "避免强烈滤镜、逆光和过度美颜。";
+"analysis.camera" = "立即拍摄";
 "analysis.choosePhoto" = "选择照片";
 "analysis.colorSeason" = "色彩季型";
 "analysis.defaultDelete" = "本地默认标记为立即删除，可选择保留 3 天。";
@@ -113,10 +114,12 @@
 "library.stepsLinked" = "步骤已关联";
 "library.title" = "找到适合你的那一件。";
 "navigation.analyze" = "开始分析";
+"navigation.forYou" = "为你";
 "navigation.history" = "分析历史";
 "navigation.language" = "中 / EN";
 "navigation.library" = "商品与教程";
 "navigation.main" = "主导航";
+"navigation.me" = "我的";
 "navigation.overview" = "概览";
 "navigation.saved" = "我的收藏";
 "navigation.workspace" = "工作区";

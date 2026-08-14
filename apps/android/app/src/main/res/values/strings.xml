@@ -35,6 +35,7 @@
   <string name="analysis_asyncDescription">这一步可能需要几十秒，因为分析和图像预览是异步完成的。</string>
   <string name="analysis_avoid">避免：</string>
   <string name="analysis_avoidFilters">避免强烈滤镜、逆光和过度美颜。</string>
+  <string name="analysis_camera">立即拍摄</string>
   <string name="analysis_choosePhoto">选择照片</string>
   <string name="analysis_colorSeason">色彩季型</string>
   <string name="analysis_defaultDelete">本地默认标记为立即删除，可选择保留 3 天。</string>
@@ -115,10 +116,12 @@
   <string name="library_stepsLinked">步骤已关联</string>
   <string name="library_title">找到适合你的那一件。</string>
   <string name="navigation_analyze">开始分析</string>
+  <string name="navigation_forYou">为你</string>
   <string name="navigation_history">分析历史</string>
   <string name="navigation_language">中 / EN</string>
   <string name="navigation_library">商品与教程</string>
   <string name="navigation_main">主导航</string>
+  <string name="navigation_me">我的</string>
   <string name="navigation_overview">概览</string>
   <string name="navigation_saved">我的收藏</string>
   <string name="navigation_workspace">工作区</string>

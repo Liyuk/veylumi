@@ -10,11 +10,9 @@ struct RootView: View {
     @State private var showSettings = false
     var body: some View {
         TabView {
-            OverviewScreen().tabItem { Label("navigation.overview".localized, systemImage: "house") }
+            OverviewScreen().tabItem { Label("navigation.forYou".localized, systemImage: "sparkles") }
             AnalyzeScreen().tabItem { Label("navigation.analyze".localized, systemImage: "camera") }
-            LibraryScreen().tabItem { Label("navigation.library".localized, systemImage: "square.grid.2x2") }
-            HistoryScreen().tabItem { Label("navigation.history".localized, systemImage: "clock") }
-            SavedScreen().tabItem { Label("navigation.saved".localized, systemImage: "heart") }
+            MeScreen().tabItem { Label("navigation.me".localized, systemImage: "person.crop.circle") }
         }
         .tint(ink)
         .sheet(isPresented: $showSettings) { SettingsScreen() }
@@ -29,6 +27,8 @@ struct OverviewScreen: View {
         Overline("overview.heroEyebrow".localized); Text("overview.goodMorning".localized + state.settings.displayName).font(.largeTitle.bold())
         Text("overview.heroDescription".localized).foregroundStyle(.secondary)
         VStack(alignment: .leading, spacing: 8) { Overline("overview.recommendedDirection".localized); Text(state.analyses.first?.text("title") ?? "overview.startWithOne".localized).font(.title2.bold()); Text(state.analyses.first?.text("summary") ?? "overview.lookDescription".localized); NavigationLink("overview.startAnalysis".localized) { AnalyzeScreen() }.buttonStyle(.borderedProminent).tint(ink) }.frame(maxWidth: .infinity, alignment: .leading).padding(20).background(blush, in: RoundedRectangle(cornerRadius: 24))
+        Text("catalog.pickedForYou".localized).font(.headline).padding(.top, 8)
+        if let recommendations = model.recommendations { ForEach(recommendations.items) { item in if let product = model.products.first(where: { $0.id == item.productId }) { VStack(alignment: .leading, spacing: 4) { Text(product.brand.uppercased()).font(.caption.bold()).foregroundStyle(moss); Text(product.name).fontWeight(.semibold); Text(item.reason).font(.footnote).foregroundStyle(.secondary) }.frame(maxWidth: .infinity, alignment: .leading).padding().background(Color.white, in: RoundedRectangle(cornerRadius: 16)) } } }
         Text("overview.nextStep".localized).font(.headline); NavigationLink { LibraryScreen() } label: { Label("overview.explore".localized, systemImage: "sparkles").frame(maxWidth: .infinity, alignment: .leading).padding().background(Color.white, in: RoundedRectangle(cornerRadius: 16)) }
     }.padding(20) } } else { ErrorState(message: model.errorMessage, retry: { await model.refresh() }) } }.navigationTitle("Veylumi") } }
 }
@@ -37,12 +37,13 @@ struct AnalyzeScreen: View {
     @EnvironmentObject private var model: AnalysisViewModel
     @State private var photo: PhotosPickerItem?
     @State private var showReport = false
+    @State private var showCamera = false
     var body: some View { NavigationStack { ScrollView { VStack(alignment: .leading, spacing: 18) {
         Overline("analysis.localDemo".localized); Text("analysis.letUsSeeYou".localized).font(.largeTitle.bold()); Text("analysis.frontPhotoIntro".localized).foregroundStyle(.secondary)
-        VStack(alignment: .leading, spacing: 12) { Text("analysis.goodPhoto".localized).font(.headline); Text("• \("analysis.naturalLight".localized)\n• \("analysis.singleFace".localized)\n• \("analysis.avoidFilters".localized)"); PhotosPicker("analysis.choosePhoto".localized, selection: $photo, matching: .images).buttonStyle(.borderedProminent).tint(ink).disabled(model.status.isBusy) }.frame(maxWidth: .infinity, alignment: .leading).padding(20).background(blush, in: RoundedRectangle(cornerRadius: 24))
+        VStack(alignment: .leading, spacing: 12) { Text("analysis.goodPhoto".localized).font(.headline); Text("• \("analysis.naturalLight".localized)\n• \("analysis.singleFace".localized)\n• \("analysis.avoidFilters".localized)"); HStack { Button("analysis.camera".localized) { showCamera = true }.buttonStyle(.borderedProminent).tint(ink); PhotosPicker("analysis.choosePhoto".localized, selection: $photo, matching: .images).buttonStyle(.bordered).tint(ink) }.disabled(model.status.isBusy) }.frame(maxWidth: .infinity, alignment: .leading).padding(20).background(blush, in: RoundedRectangle(cornerRadius: 24))
         StatusView(status: model.status)
         if let error = model.errorMessage { Text(error).foregroundStyle(.red) }
-    }.padding(20) }.navigationTitle("navigation.analyze".localized).navigationDestination(isPresented: $showReport) { ReportScreen() }.onChange(of: photo) { _, selected in Task { await model.upload(selected) } }.onChange(of: model.status) { _, status in if case .completed = status { showReport = true } } } }
+    }.padding(20) }.navigationTitle("navigation.analyze".localized).navigationDestination(isPresented: $showReport) { ReportScreen() }.sheet(isPresented: $showCamera) { CameraPicker { data in Task { await model.upload(data) } } }.onChange(of: photo) { _, selected in Task { await model.upload(selected) } }.onChange(of: model.status) { _, status in if case .completed = status { showReport = true } } } }
 }
 
 struct LibraryScreen: View {
@@ -65,6 +66,10 @@ struct SavedScreen: View {
     var body: some View { NavigationStack { ScrollView { VStack(alignment: .leading, spacing: 14) { Overline("saved.eyebrow".localized); Text("saved.description".localized).font(.title.bold()); let saved = model.products.filter { model.snapshot?.savedProductIds.contains($0.id) == true }; if saved.isEmpty { ContentUnavailableView("saved.emptyTitle".localized, systemImage: "heart") } else { ForEach(saved) { product in ProductCard(product: product, saved: true) { Task { await model.toggleSaved(product.id) } } } } }.padding(20) }.navigationTitle("navigation.saved".localized) } }
 }
 
+struct MeScreen: View {
+    var body: some View { NavigationStack { List { NavigationLink { HistoryScreen() } label: { Label("navigation.history".localized, systemImage: "clock") } ; NavigationLink { SavedScreen() } label: { Label("navigation.saved".localized, systemImage: "heart") } ; NavigationLink { SettingsScreen() } label: { Label("account.settings".localized, systemImage: "gearshape") } }.navigationTitle("navigation.me".localized) } }
+}
+
 struct ReportScreen: View {
     @EnvironmentObject private var model: AnalysisViewModel
     var body: some View { ScrollView { VStack(alignment: .leading, spacing: 16) { Overline("report.personalizedReport".localized); Text(model.report?.result?["title"]?.text ?? "report.localDemoAnalysis".localized).font(.largeTitle.bold()); Text(model.report?.result?["summary"]?.text ?? "report.recommendationFallback".localized).foregroundStyle(.secondary); Text("report.faceNotes".localized).font(.headline).padding(.top, 8); Text(model.report?.result?["faceNotes"]?.text ?? "report.recommendationFallback".localized); Text("analysis.needAdjustment".localized).font(.headline).padding(.top, 8); HStack { Button("analysis.tooYellow".localized) { Task { await model.addFeedback("too-yellow") } }.buttonStyle(.bordered); Button("analysis.notForMe".localized) { Task { await model.addFeedback("not-for-me") } }.buttonStyle(.bordered) }; Text("catalog.pickedForYou".localized).font(.headline).padding(.top, 8); ForEach(model.products) { product in ProductCard(product: product, saved: model.snapshot?.savedProductIds.contains(product.id) == true) { Task { await model.toggleSaved(product.id) } } } }.padding(20) }.navigationTitle("report.personalizedReport".localized).navigationBarTitleDisplayMode(.inline) }
@@ -81,6 +86,7 @@ private struct ProductCard: View { let product: Product; let saved: Bool; let ac
 private struct StatusView: View { let status: AnalysisViewModel.Status; var body: some View { switch status { case .idle: EmptyView(); case .queued: ProgressView("queued"); case .running: ProgressView("analysis.inProgress".localized); case .completed: Label("history.completed".localized, systemImage: "checkmark.circle.fill").foregroundStyle(moss); case .failed(let error): Text(error).foregroundStyle(.red) } } }
 private struct ErrorState: View { let message: String?; let retry: () async -> Void; var body: some View { ContentUnavailableView { Label("API unavailable", systemImage: "wifi.exclamationmark") } description: { Text(message ?? "") } actions: { Button("admin.refresh".localized) { Task { await retry() } } } } }
 private struct Overline: View { let text: String; init(_ text: String) { self.text = text }; var body: some View { Text(text).font(.caption.bold()).foregroundStyle(moss) } }
+private struct CameraPicker: UIViewControllerRepresentable { let complete: (Data) -> Void; @Environment(\.dismiss) private var dismiss; func makeCoordinator() -> Coordinator { Coordinator(self) }; func makeUIViewController(context: Context) -> UIImagePickerController { let controller = UIImagePickerController(); controller.sourceType = .camera; controller.delegate = context.coordinator; return controller }; func updateUIViewController(_ controller: UIImagePickerController, context: Context) {} ; final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate { let parent: CameraPicker; init(_ parent: CameraPicker) { self.parent = parent }; func imagePickerControllerDidCancel(_ picker: UIImagePickerController) { parent.dismiss() }; func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) { if let image = info[.originalImage] as? UIImage, let data = image.jpegData(compressionQuality: 0.92) { parent.complete(data) }; parent.dismiss() } } }
 
 private enum AppLanguage { static var code: String { get { UserDefaults.standard.string(forKey: "veylumi.language") ?? "zh-CN" } set { UserDefaults.standard.set(newValue, forKey: "veylumi.language") } } }
 extension String { var localized: String { let language = AppLanguage.code == "en-US" ? "en" : "zh-Hans"; let bundle = Bundle(path: Bundle.main.path(forResource: language, ofType: "lproj") ?? "") ?? .main; return bundle.localizedString(forKey: self, value: self, table: nil) } }

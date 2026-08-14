@@ -4,6 +4,7 @@
     "page": { "paddingToken": "space.5", "backgroundToken": "color.canvas" },
     "card": { "surfaceToken": "color.surface", "radiusToken": "radius.card", "paddingToken": "space.4", "borderToken": "color.line" },
     "heroCard": { "surfaceToken": "color.blush", "radiusToken": "radius.lg", "paddingToken": "space.5" },
+    "primaryNavigation": { "destinations": ["forYou", "analyze", "me"], "desktopPattern": "compact-left-rail", "mobilePattern": "three-item-bottom-tabs", "reportBehavior": "push-fullscreen" },
     "primaryAction": { "colorToken": "color.accent", "foregroundToken": "color.accentInk", "minimumTouchTarget": 44 },
     "status": { "loading": "progress plus text", "empty": "icon plus title plus next action", "error": "message plus retry action" }
   },

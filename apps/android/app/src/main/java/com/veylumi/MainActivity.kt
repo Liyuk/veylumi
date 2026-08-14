@@ -2,6 +2,7 @@ package com.veylumi
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.graphics.Bitmap
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -19,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import java.io.ByteArrayOutputStream
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -47,7 +49,7 @@ fun VeylumiApp(viewModel: AppViewModel = viewModel()) {
     val ui by viewModel.state.collectAsStateWithLifecycle()
     val nav = rememberNavController()
     val entry by nav.currentBackStackEntryAsState()
-    val route = entry?.destination?.route ?: "overview"
+    val route = entry?.destination?.route ?: "forYou"
     val locale = if (ui.data?.state?.settings?.language == "en-US") "en-US" else "zh-CN"
     var showSettings by remember { mutableStateOf(false) }
     MaterialTheme(colorScheme = lightColorScheme(primary = Ink, secondary = Moss, surface = Paper, background = Paper)) {
@@ -69,22 +71,29 @@ fun VeylumiApp(viewModel: AppViewModel = viewModel()) {
 }
 
 @Composable private fun AppNavigation(nav: NavHostController, route: String, locale: String) {
-    val items = listOf("overview" to "navigation.overview", "analyze" to "navigation.analyze", "library" to "navigation.library", "history" to "navigation.history", "saved" to "navigation.saved")
+    val items = listOf("forYou" to "navigation.forYou", "analyze" to "navigation.analyze", "me" to "navigation.me")
     NavigationBar { items.forEach { (destination, key) ->
-        NavigationBarItem(selected = route == destination, onClick = { nav.navigate(destination) { launchSingleTop = true; popUpTo("overview") { saveState = true }; restoreState = true } }, icon = { Text("•") }, label = { Text(tr(key, locale)) })
+        NavigationBarItem(selected = route == destination, onClick = { nav.navigate(destination) { launchSingleTop = true; popUpTo("forYou") { saveState = true }; restoreState = true } }, icon = { Text("•") }, label = { Text(tr(key, locale)) })
     } }
 }
 
 @Composable private fun AppNavHost(nav: NavHostController, ui: AppUiState, vm: AppViewModel, locale: String) {
     val data = ui.data ?: return
-    NavHost(nav, startDestination = "overview") {
-        composable("overview") { OverviewScreen(data, locale, onAnalyze = { nav.navigate("analyze") }, onLibrary = { nav.navigate("library") }) }
+    NavHost(nav, startDestination = "forYou") {
+        composable("forYou") { OverviewScreen(data, locale, onAnalyze = { nav.navigate("analyze") }, onLibrary = { nav.navigate("library") }) }
         composable("analyze") { AnalyzeScreen(ui, locale, vm::upload, onCompleted = { nav.navigate("report") }) }
+        composable("me") { MeScreen(data, locale, onHistory = { nav.navigate("history") }, onSaved = { nav.navigate("saved") }) }
         composable("library") { LibraryScreen(data, locale, vm::toggleSaved) }
         composable("history") { HistoryScreen(data, locale, onNew = { nav.navigate("analyze") }) }
         composable("saved") { SavedScreen(data, locale, vm::toggleSaved) }
         composable("report") { ReportScreen(ui.report, data, locale, onBack = { nav.popBackStack() }, onSave = vm::toggleSaved, onFeedback = vm::addFeedback) }
     }
+}
+
+@Composable private fun MeScreen(data: AppData, locale: String, onHistory: () -> Unit, onSaved: () -> Unit) = PageColumn {
+    Overline(tr("history.eyebrow", locale)); Text(tr("navigation.me", locale), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+    OutlinedCard(Modifier.fillMaxWidth().clickable(onClick = onHistory).padding(bottom = 10.dp)) { Column(Modifier.padding(16.dp)) { Text(tr("navigation.history", locale), fontWeight = FontWeight.SemiBold); Text("${data.state.analyses.size} ${tr("history.count", locale)}", color = Color.DarkGray) } }
+    OutlinedCard(Modifier.fillMaxWidth().clickable(onClick = onSaved)) { Column(Modifier.padding(16.dp)) { Text(tr("navigation.saved", locale), fontWeight = FontWeight.SemiBold); Text("${data.state.savedProductIds.size} ${tr("saved.count", locale)}", color = Color.DarkGray) } }
 }
 
 @Composable private fun OverviewScreen(data: AppData, locale: String, onAnalyze: () -> Unit, onLibrary: () -> Unit) {
@@ -102,6 +111,10 @@ fun VeylumiApp(viewModel: AppViewModel = viewModel()) {
         } }
         SectionTitle(tr("overview.nextStep", locale))
         OutlinedCard(Modifier.fillMaxWidth().clickable(onClick = onLibrary)) { Column(Modifier.padding(16.dp)) { Text(tr("overview.explore", locale), fontWeight = FontWeight.SemiBold); Text(tr("overview.realLinks", locale), color = Color.DarkGray) } }
+        SectionTitle(tr("catalog.pickedForYou", locale))
+        data.recommendations.items.mapNotNull { item -> data.products.find { it.id == item.productId }?.let { item to it } }.forEach { (item, product) ->
+            OutlinedCard(Modifier.fillMaxWidth().padding(bottom = 10.dp)) { Column(Modifier.padding(16.dp)) { Text(product.brand.uppercase(), style = MaterialTheme.typography.labelSmall, color = Moss); Text(product.name, fontWeight = FontWeight.SemiBold); Text(item.reason, color = Color.DarkGray, style = MaterialTheme.typography.bodySmall) } }
+        }
     }
 }
 
@@ -112,6 +125,11 @@ fun VeylumiApp(viewModel: AppViewModel = viewModel()) {
         val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: return@rememberLauncherForActivityResult
         upload(bytes, "photo-${System.currentTimeMillis()}", context.contentResolver.getType(uri) ?: "image/jpeg")
     }
+    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
+        bitmap ?: return@rememberLauncherForActivityResult
+        val output = ByteArrayOutputStream(); bitmap.compress(Bitmap.CompressFormat.JPEG, 92, output)
+        upload(output.toByteArray(), "camera-${System.currentTimeMillis()}.jpg", "image/jpeg")
+    }
     LaunchedEffect(ui.report?.status) { if (ui.report?.status == "completed") onCompleted() }
     PageColumn {
         Overline(tr("analysis.localDemo", locale))
@@ -121,7 +139,7 @@ fun VeylumiApp(viewModel: AppViewModel = viewModel()) {
         ElevatedCard(colors = CardDefaults.elevatedCardColors(containerColor = Blush)) { Column(Modifier.padding(20.dp)) {
             Text(tr("analysis.goodPhoto", locale), fontWeight = FontWeight.Bold)
             Text("• ${tr("analysis.naturalLight", locale)}\n• ${tr("analysis.singleFace", locale)}\n• ${tr("analysis.avoidFilters", locale)}")
-            Button(onClick = { picker.launch("image/*") }, enabled = ui.analysisStatus == null || ui.analysisStatus == "completed" || ui.analysisStatus == "failed", modifier = Modifier.padding(top = 16.dp)) { Text(tr("analysis.choosePhoto", locale)) }
+            Row(Modifier.padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) { Button(onClick = { camera.launch(null) }, enabled = ui.analysisStatus == null || ui.analysisStatus == "completed" || ui.analysisStatus == "failed") { Text(tr("analysis.camera", locale)) }; OutlinedButton(onClick = { picker.launch("image/*") }, enabled = ui.analysisStatus == null || ui.analysisStatus == "completed" || ui.analysisStatus == "failed") { Text(tr("analysis.choosePhoto", locale)) } }
         } }
         if (ui.analysisStatus != null) StatusCard(ui.analysisStatus, locale)
         ui.error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 12.dp)) }

@@ -240,6 +240,8 @@
   <string name="system_connecting">正在连接 Veylumi Server API…</string>
   <string name="system_noLocalStorageFallback">Veylumi 不会使用浏览器 localStorage 作为回退数据源。</string>
   <string name="system_reconnect">重新连接</string>
+  <string name="system_staticBadge">静态演示</string>
+  <string name="system_staticModeDescription">纯静态演示：数据仅保存在此浏览器，分析为固定模拟结果。</string>
   <string name="toast_addedSaved">已加入收藏</string>
   <string name="toast_analysisComplete">照片已接收，本地分析已完成</string>
   <string name="toast_analysisFailed">分析任务失败</string>

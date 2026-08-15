@@ -1,0 +1,53 @@
+# 纯静态版部署：push 到 main 时构建静态产物并发布到 GitHub Pages。
+# 访问地址：https://<owner>.github.io/veylumi/（仓库名决定了子路径前缀）。
+#
+# 静态版完全无后端：数据存在访问者的浏览器 localStorage，分析结果用固定
+# fixture（见 apps/web/app/static-adapter.ts）。部署产物来自 apps/web/dist/client。
+
+name: Deploy static demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# 允许 Pages 的 GITHUB_TOKEN 读取仓库并发布部署。
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # 静态构建：output:"export" + /veylumi basePath + 字体/favicon 前缀重写
+      - run: npm run build:static
+      # .nojekyll 关闭 Jekyll 处理，避免下划线目录（如 _headers）被忽略
+      - run: touch apps/web/dist/client/.nojekyll
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist/client
+  deploy:
+    needs: build-static
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -2,10 +2,29 @@ import { LocalDb } from "./local-db";
 import { createAnalysisWaiter } from "../../../services/api/server/wait-analysis.mjs";
 import type { AnalysisJob as ContractAnalysisJob, ApiFailure as ContractApiFailure, ApiMeta as ContractApiMeta, ApiSuccess as ContractApiSuccess, RecommendationResponse, StateOperation } from "../../../packages/api-contract/generated/types";
 import { platformContract } from "../../../packages/client-contract/generated";
+import { staticApplyStateOperation, staticDeletePhotoPreview, staticFetchDb, staticFetchPreviewImage, staticFetchRecommendations, staticGetPhotoAnalysis, staticSaveDb, staticStartPhotoAnalysis, staticWaitForPhotoAnalysis, isStaticMode as detectStaticMode } from "./static-adapter";
 
 const API_BASE = process.env.NEXT_PUBLIC_VEYLUMI_API_URL ?? platformContract.api.defaultWebUrl;
 let apiToken: string | null = null;
 let writeQueue: Promise<LocalDb> = Promise.resolve({ version: 1, revision: 0 } as LocalDb);
+
+// 运行模式：显式 ?static=1 / 构建期 base 自动识别为静态时，全部数据读写落到
+// localStorage（见 static-adapter.ts）；否则走真实 Server API。API 首次不可达
+// 时自动降级到静态适配器，避免纯静态部署落在"API 不可用"错误屏。
+let resolvedMode: "api" | "static" | null = null;
+function currentMode(): "api" | "static" {
+  if (resolvedMode) return resolvedMode;
+  resolvedMode = detectStaticMode() ? "static" : "api";
+  return resolvedMode;
+}
+// persist=true 表示用户显式选择静态演示（?static=1），记住偏好；自动降级不持久化。
+function switchToStatic(persist: boolean): void {
+  resolvedMode = "static";
+  if (persist) {
+    try { window.localStorage.setItem("veylumi.static-mode", "1"); } catch { /* 存储不可用时忽略 */ }
+  }
+}
+export function isStaticMode(): boolean { return currentMode() === "static"; }
 
 export type LocalAnalysisPayload = {
   provider: "local-mock" | "codex-local";
@@ -54,17 +73,34 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return envelope.data;
 }
 
-export function fetchDb(): Promise<LocalDb> {
-  return request<LocalDb>("/api/state");
+export async function fetchDb(): Promise<LocalDb> {
+  if (currentMode() === "static") return staticFetchDb();
+  try {
+    return await request<LocalDb>("/api/state");
+  } catch (error) {
+    if (isServerUnavailable(error)) { switchToStatic(false); return staticFetchDb(); }
+    throw error;
+  }
 }
 
-export function fetchRecommendations(): Promise<RecommendationResponse> {
-  return request<RecommendationResponse>("/api/recommendations?limit=3");
+export async function fetchRecommendations(): Promise<RecommendationResponse> {
+  if (currentMode() === "static") return staticFetchRecommendations();
+  try {
+    return await request<RecommendationResponse>("/api/recommendations?limit=3");
+  } catch (error) {
+    if (isServerUnavailable(error)) { switchToStatic(false); return staticFetchRecommendations(); }
+    throw error;
+  }
+}
+
+function isServerUnavailable(error: unknown): boolean {
+  return error instanceof TypeError || error instanceof ServerApiError && (error.status === 0 || error.status >= 500);
 }
 
 // 带乐观锁的整库保存：If-Match 携带当前 revision，服务端不匹配返回 409。
 // 冲突时拉取服务端最新状态，按集合做并集 merge 后再写。
-export function saveDb(db: LocalDb): Promise<LocalDb> {
+export async function saveDb(db: LocalDb): Promise<LocalDb> {
+  if (currentMode() === "static") return staticSaveDb(db);
   const attempt = (candidate: LocalDb): Promise<LocalDb> =>
     request<LocalDb>("/api/state", { method: "POST", body: JSON.stringify(candidate), headers: { "if-match": String(candidate.revision) } });
   const run = writeQueue
@@ -79,15 +115,22 @@ export function saveDb(db: LocalDb): Promise<LocalDb> {
       throw error;
     });
   writeQueue = run;
-  return writeQueue;
+  try {
+    return await run;
+  } catch (error) {
+    if (isServerUnavailable(error)) { switchToStatic(false); return staticSaveDb(db); }
+    throw error;
+  }
 }
 
 // 高频小改动使用同一 state 资源上的命名 operation；整库 POST 仍仅为旧客户端兼容保留。
 export async function applyStateOperation(operation: StateOperation, revision: number): Promise<LocalDb> {
+  if (currentMode() === "static") return staticApplyStateOperation(operation, revision);
   const attempt = (expectedRevision: number) => request<LocalDb>("/api/state", { method: "PATCH", body: JSON.stringify(operation), headers: { "if-match": String(expectedRevision) } });
   try { return await attempt(revision); }
   catch (error) {
     if (error instanceof ServerApiError && error.status === 409) return attempt((await fetchDb()).revision);
+    if (isServerUnavailable(error)) { switchToStatic(false); return staticApplyStateOperation(operation, revision); }
     throw error;
   }
 }
@@ -115,6 +158,7 @@ export function mergeDb(remote: LocalDb, local: LocalDb): LocalDb {
 }
 
 export async function startPhotoAnalysis(file: File): Promise<AnalysisJob<never> & { notifications?: { sseUrl: string } }> {
+  if (currentMode() === "static") return staticStartPhotoAnalysis(file);
   const imageData = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("无法读取图片"));
@@ -125,12 +169,14 @@ export async function startPhotoAnalysis(file: File): Promise<AnalysisJob<never>
   return request<AnalysisJob<never> & { notifications?: { sseUrl: string } }>("/api/analyze", { method: "POST", headers: { "idempotency-key": idempotencyKey }, body: JSON.stringify({ imageData, filename: file.name, mimeType: file.type, size: file.size }) });
 }
 
-export function getPhotoAnalysis(jobId: string): Promise<AnalysisJob<LocalAnalysisPayload>> {
+export async function getPhotoAnalysis(jobId: string): Promise<AnalysisJob<LocalAnalysisPayload>> {
+  if (currentMode() === "static") return staticGetPhotoAnalysis(jobId);
   return request<AnalysisJob<LocalAnalysisPayload>>(`/api/analyze/${encodeURIComponent(jobId)}`);
 }
 
 // 预览文件私有化后，前端用 fetch+blob 生成 objectURL 展示；返回 revoke 以便生命周期管理。
 export async function fetchPreviewImage(jobId: string): Promise<{ url: string; revoke: () => void } | null> {
+  if (currentMode() === "static") return staticFetchPreviewImage();
   const token = await resolveToken();
   try {
     const response = await fetch(`${API_BASE}/api/analyze/${encodeURIComponent(jobId)}/preview`, { headers: token ? { authorization: `Bearer ${token}` } : {}, cache: "no-store" });
@@ -141,11 +187,13 @@ export async function fetchPreviewImage(jobId: string): Promise<{ url: string; r
   } catch { return null; }
 }
 
-export function deletePhotoPreview(jobId: string): Promise<{ deleted: boolean }> {
+export async function deletePhotoPreview(jobId: string): Promise<{ deleted: boolean }> {
+  if (currentMode() === "static") return staticDeletePhotoPreview();
   return request<{ deleted: boolean }>(`/api/analyze/${encodeURIComponent(jobId)}/preview`, { method: "POST", body: "{}" });
 }
 
 export async function waitForPhotoAnalysis(jobId: string): Promise<AnalysisJob<LocalAnalysisPayload>> {
+  if (currentMode() === "static") return staticWaitForPhotoAnalysis(jobId);
   const { wait } = createAnalysisWaiter({
     get: getPhotoAnalysis,
     createEventSource: (id) => {

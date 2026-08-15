@@ -42,6 +42,7 @@ V2 不会在 V1 中承诺精确尺码、版型或人体测量结果。
 
 ## 交付文档
 
+- [**项目说明文档（含运行截图）**](docs/PROJECT.md)
 - [V1 PRD](docs/PRD-v1.md)
 - [V1 TRD](docs/TRD-v1.md)
 - [本地数据模型](docs/local-data-model.md)
@@ -77,3 +78,52 @@ npm run build
 npm run lint
 npm run typecheck
 ```
+
+## 纯静态版（GitHub Pages）
+
+Veylumi 可以构建成**零后端、纯静态**的演示版本，部署到 GitHub Pages 等任何静态托管。
+
+### 是什么
+
+静态版把所有数据读写落到访问者的浏览器 **localStorage**：分析历史、收藏、设置都存在本地；分析结果使用与 API `local-mock` 相同的固定 fixture；推荐用与 API 网关相同的规则引擎生成。因此它**不需要 Cloudflare Worker、D1、R2 或任何后端进程**，任何人打开链接即可体验完整闭环（上传照片 → 分析报告 → 商品推荐 → 教程 → 历史）。
+
+### 与完整版的区别
+
+| | 本地完整版（`npm run dev` + `api:local`） | 静态版（GitHub Pages） |
+| --- | --- | --- |
+| 后端 | 本地 Server API（Codex / fixture 分析） | **无后端** |
+| 数据存储 | 服务端 JSON repository | 访问者浏览器 localStorage |
+| 照片上传 | 上传到本地 API，按策略保留/TTL 删除 | 仅在浏览器内处理，不上传 |
+| 分析结果 | 真实 Codex 或 local-mock | 固定 fixture（顶部有「静态演示」徽标） |
+| AFTER 预览 | gpt-image-2 或本地模拟 | 无生成预览，显示原图 |
+
+### 本地构建与预览
+
+```bash
+# 构建静态产物（默认 base 前缀 /veylumi，适合 GitHub Pages 项目子路径）
+npm run build:static
+
+# 根域部署（或自定义域）时传空 base：
+#   VEYLUMI_BASE_PATH="" npm run build:static
+
+# 预览产物（在 apps/web/dist/client 起静态服务即可）
+cd apps/web/dist/client && npx serve .
+```
+
+静态构建做了三件事：`output: "export"` 预渲染所有路由到 `apps/web/dist/client`；把资源引用改写成 `/veylumi/` 前缀（vite `base`）；用 `build/static-rewrite.mjs` 修正字体与 favicon 的根绝对引用。
+
+### 部署到 GitHub Pages
+
+仓库已带 [`.github/workflows/pages.yml`](.github/workflows/pages.yml)：push 到 `main` 自动构建静态版并发布到 `https://<owner>.github.io/veylumi/`。首次需要：
+
+1. 打开仓库 **Settings → Pages**，把 Source 设为 **GitHub Actions**；
+2. 推送后等待 workflow 完成，访问上面的地址。
+
+> 注意：GitHub Pages 的 URL 是 `/<仓库名>` 子路径，前缀写死在构建配置里（`apps/web/next.config.ts` 的 vite `base` + `build/static-rewrite.mjs`）。如果换仓库名或想用根域部署，用 `VEYLUMI_BASE_PATH` 覆盖（见上）。
+
+### 行为细节
+
+- 页面右上角出现「静态演示」徽标表示当前是静态模式；`?static=1` 可强制指定，`?static=0` 强制走真实 API。
+- 静态模式也会**自动降级**：本地 `npm run dev` 起前端但没起后端时，首次 API 请求失败会自动切到静态适配器，不会卡在错误屏。
+- 静态版的 localStorage 数据与真实 API 数据互不相通，两者是独立的。
+- 静态版**不包含** admin 运维页面的可用数据（它面向本地 API 的 metrics/logs）。

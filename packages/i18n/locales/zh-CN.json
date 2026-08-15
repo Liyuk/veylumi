@@ -155,6 +155,8 @@
   "system.reconnect": "重新连接",
   "system.noLocalStorageFallback": "Veylumi 不会使用浏览器 localStorage 作为回退数据源。",
   "system.connecting": "正在连接 Veylumi Server API…",
+  "system.staticBadge": "静态演示",
+  "system.staticModeDescription": "纯静态演示：数据仅保存在此浏览器，分析为固定模拟结果。",
   "auth.welcome": "欢迎回来。",
   "auth.localDemoDescription": "这是本地模拟登录，不会连接真实账号或发送任何数据。",
   "auth.signInDemo": "以 Demo 账号登录",

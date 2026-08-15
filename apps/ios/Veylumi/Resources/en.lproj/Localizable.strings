@@ -238,6 +238,8 @@
 "system.connecting" = "Connecting to the Veylumi Server API…";
 "system.noLocalStorageFallback" = "Veylumi does not use browser localStorage as a fallback data source.";
 "system.reconnect" = "Reconnect";
+"system.staticBadge" = "Static demo";
+"system.staticModeDescription" = "Static demo: data is stored only in this browser; analysis uses a fixed mock result.";
 "toast.addedSaved" = "Added to saved items";
 "toast.analysisComplete" = "Photo received; local analysis is complete";
 "toast.analysisFailed" = "Analysis job failed";

@@ -44,6 +44,7 @@ export default defineConfig(async () => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
+    base: process.env.VEYLUMI_STATIC === "1" ? (process.env.VEYLUMI_BASE_PATH ?? "/veylumi") : undefined,
     resolve: {
       // Radix Themes imports classnames as an ESM default. vinext's local
       // dependency pre-bundler does not expose the CommonJS default reliably.

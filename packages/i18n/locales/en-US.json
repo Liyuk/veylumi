@@ -156,6 +156,8 @@
   "system.reconnect": "Reconnect",
   "system.noLocalStorageFallback": "Veylumi does not use browser localStorage as a fallback data source.",
   "system.connecting": "Connecting to the Veylumi Server API…",
+  "system.staticBadge": "Static demo",
+  "system.staticModeDescription": "Static demo: data is stored only in this browser; analysis uses a fixed mock result.",
   "auth.welcome": "Welcome back.",
   "auth.localDemoDescription": "This local demo does not connect to real accounts or send data.",
   "auth.signInDemo": "Sign in with demo account",

@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "npm --prefix apps/web run dev",
     "build": "npm --prefix apps/web run build",
+    "build:static": "npm run build:static:web && node build/static-rewrite.mjs",
+    "build:static:web": "rm -rf apps/web/dist && VEYLUMI_STATIC=1 VEYLUMI_BASE_PATH=\"${VEYLUMI_BASE_PATH:-/veylumi}\" npm --prefix apps/web run build",
     "start": "npm --prefix apps/web run start",
     "api:local": "npm --prefix services/api run local",
     "recommendation:local": "npm --prefix services/recommendation run start",

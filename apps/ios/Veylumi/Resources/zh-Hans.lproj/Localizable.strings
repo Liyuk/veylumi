@@ -238,6 +238,8 @@
 "system.connecting" = "正在连接 Veylumi Server API…";
 "system.noLocalStorageFallback" = "Veylumi 不会使用浏览器 localStorage 作为回退数据源。";
 "system.reconnect" = "重新连接";
+"system.staticBadge" = "静态演示";
+"system.staticModeDescription" = "纯静态演示：数据仅保存在此浏览器，分析为固定模拟结果。";
 "toast.addedSaved" = "已加入收藏";
 "toast.analysisComplete" = "照片已接收，本地分析已完成";
 "toast.analysisFailed" = "分析任务失败";
